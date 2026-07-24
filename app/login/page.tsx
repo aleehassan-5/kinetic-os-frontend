@@ -1,0 +1,154 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Input, Label } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
+import { ApiError } from "@/lib/api-client";
+
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      await login(email, password);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Invalid email or password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="grid min-h-screen lg:grid-cols-2">
+      {/* Left — form */}
+      <div className="flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-[380px] animate-fade-in">
+          <div className="mb-9 flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary">
+              <Sparkles className="h-4.5 w-4.5 text-white" />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+          </div>
+
+          <h1 className="text-[22px] font-semibold tracking-tight text-text-primary">Welcome back</h1>
+          <p className="mt-1.5 text-[13.5px] text-text-secondary">
+            Sign in to your workspace to manage leads, chat and campaigns.
+          </p>
+
+          {error && (
+            <div className="mt-5 rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Work email</Label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@company.com"
+                  required
+                  className="pl-9"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/forgot-password" className="text-[12.5px] font-medium text-primary hover:text-primary-hover">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••••"
+                  required
+                  className="pl-9"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full" size="lg" loading={loading}>
+              {!loading && (
+                <>
+                  Sign in <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+              {loading && "Signing in…"}
+            </Button>
+          </form>
+
+          <div className="my-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-[11.5px] uppercase tracking-wider text-text-muted">or continue with</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="secondary" size="lg">Google</Button>
+            <Button variant="secondary" size="lg">Microsoft</Button>
+          </div>
+
+          <p className="mt-8 text-center text-[13px] text-text-secondary">
+            Don&apos;t have a workspace?{" "}
+            <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
+              Create one
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Right — brand panel */}
+      <div className="relative hidden overflow-hidden border-l border-border bg-surface lg:block">
+        <div className="absolute inset-0 flex flex-col justify-between p-12">
+          <div />
+          <div className="max-w-md">
+            <div className="mb-5 flex -space-x-2">
+              {["WA", "TG", "IG", "FB", "EM"].map((c) => (
+                <div
+                  key={c}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-surface bg-card text-[10.5px] font-semibold text-text-secondary"
+                >
+                  {c}
+                </div>
+              ))}
+            </div>
+            <p className="text-[19px] font-medium leading-relaxed text-text-primary">
+              &ldquo;Every WhatsApp, Instagram and email lead now gets scored and replied to in under 30 seconds — before we even see it.&rdquo;
+            </p>
+            <p className="mt-4 text-[13px] text-text-secondary">Head of Growth, mid-market agency</p>
+          </div>
+          <div className="flex items-center gap-6 text-[12.5px] text-text-muted">
+            <span>SOC 2 Type II</span>
+            <span>99.98% uptime</span>
+            <span>GDPR ready</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
