@@ -12,6 +12,7 @@ import { ApiPost, mapApiPost, ScheduledPost } from "@/components/scheduler/data"
 import { api } from "@/lib/api-client";
 
 export default function SchedulerPage() {
+  const [viewDate, setViewDate] = useState(() => new Date());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
@@ -30,6 +31,11 @@ export default function SchedulerPage() {
     fetchPosts();
   }, [fetchPosts]);
 
+  function changeMonth(delta: number) {
+    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + delta, 1));
+    setSelectedDay(null);
+  }
+
   return (
     <>
       <Topnav title="Social Scheduler" subtitle="Static graphics & AI-voiceover reels, planned across channels" />
@@ -37,11 +43,15 @@ export default function SchedulerPage() {
       <main className="p-6 lg:p-8">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" onClick={() => changeMonth(-1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
             <span className="min-w-[140px] text-center text-[14px] font-semibold text-text-primary">
-              {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+              {viewDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
             </span>
-            <Button variant="outline" size="icon"><ChevronRight className="h-4 w-4" /></Button>
+            <Button variant="outline" size="icon" onClick={() => changeMonth(1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
           <Button size="sm" onClick={() => setComposerOpen(true)}>
             <Plus className="h-4 w-4" /> New post
@@ -55,14 +65,14 @@ export default function SchedulerPage() {
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading calendar…
               </div>
             ) : (
-              <CalendarGrid selectedDay={selectedDay} onSelect={setSelectedDay} posts={posts} />
+              <CalendarGrid viewDate={viewDate} selectedDay={selectedDay} onSelect={setSelectedDay} posts={posts} />
             )}
           </Card>
 
           <Card className="overflow-hidden">
             <CardHeader>
               <div>
-                <CardTitle>{selectedDay ? `This month, day ${selectedDay}` : "All upcoming"}</CardTitle>
+                <CardTitle>{selectedDay ? `${viewDate.toLocaleDateString("en-US", { month: "long" })} ${selectedDay}` : "All upcoming"}</CardTitle>
                 <CardDescription>Queue for this day</CardDescription>
               </div>
               {selectedDay && (
@@ -72,7 +82,13 @@ export default function SchedulerPage() {
               )}
             </CardHeader>
             <div className="max-h-[520px] overflow-y-auto">
-              <QueueList day={selectedDay} posts={posts} />
+              <QueueList
+                day={selectedDay}
+                month={viewDate.getMonth()}
+                year={viewDate.getFullYear()}
+                posts={posts}
+                onChanged={fetchPosts}
+              />
             </div>
           </Card>
         </div>

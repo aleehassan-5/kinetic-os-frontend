@@ -8,9 +8,10 @@ interface IntegrationCardProps {
   syncedCount: number;
   colorFrom: string;
   colorTo: string;
+  manageUrl: string;
 }
 
-export function IntegrationCard({ name, account, connected, syncedCount, colorFrom, colorTo }: IntegrationCardProps) {
+export function IntegrationCard({ name, account, connected, syncedCount, colorFrom, colorTo, manageUrl }: IntegrationCardProps) {
   return (
     <div className="flex items-center gap-3.5 rounded-card border border-border bg-card p-4">
       <div
@@ -28,7 +29,11 @@ export function IntegrationCard({ name, account, connected, syncedCount, colorFr
           {connected ? `${account} · ${syncedCount} events synced` : "Not connected"}
         </p>
       </div>
-      <Button variant={connected ? "outline" : "primary"} size="sm">
+      <Button
+        variant={connected ? "outline" : "primary"}
+        size="sm"
+        onClick={() => window.open(manageUrl, "_blank", "noopener,noreferrer")}
+      >
         {connected ? <Settings2 className="h-3.5 w-3.5" /> : null}
         {connected ? "Manage" : "Connect"}
       </Button>

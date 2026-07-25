@@ -1,12 +1,52 @@
-import { Mic, Image as ImageIcon, Video, Layers, CalendarX2 } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Mic, Image as ImageIcon, Video, Layers, CalendarX2, RotateCw, Trash2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { platformStyle, statusVariant, ScheduledPost } from "./data";
+import { api } from "@/lib/api-client";
 
 const typeIcon = { Reel: Video, "Static Graphic": ImageIcon, Carousel: Layers, Story: Video };
 
-export function QueueList({ day, posts }: { day: number | null; posts: ScheduledPost[] }) {
-  const list: ScheduledPost[] = day ? posts.filter((p) => p.day === day) : posts;
+export function QueueList({
+  day,
+  month,
+  year,
+  posts,
+  onChanged,
+}: {
+  day: number | null;
+  month: number;
+  year: number;
+  posts: ScheduledPost[];
+  onChanged: () => void;
+}) {
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const list: ScheduledPost[] = day ? posts.filter((p) => p.day === day && p.month === month && p.year === year) : posts;
+
+  async function retry(id: string) {
+    setBusyId(id);
+    try {
+      await api.post(`/social/posts/${id}/publish-now`);
+      onChanged();
+    } catch {
+      // surfaced via the post's own error/status on refresh
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function remove(id: string) {
+    setBusyId(id);
+    try {
+      await api.delete(`/social/posts/${id}`);
+      onChanged();
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   if (list.length === 0) {
     return (
@@ -25,6 +65,7 @@ export function QueueList({ day, posts }: { day: number | null; posts: Scheduled
       {list.map((p) => {
         const s = platformStyle[p.platform];
         const Icon = typeIcon[p.type];
+        const busy = busyId === p.id;
         return (
           <div key={p.id} className="flex items-start gap-3 p-3.5 transition-colors duration-200 hover:bg-white/[0.02]">
             <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-control", s.bg)}>
@@ -41,6 +82,27 @@ export function QueueList({ day, posts }: { day: number | null; posts: Scheduled
                   </span>
                 )}
               </div>
+              {p.status === "Failed" && p.error && (
+                <p className="mt-1 text-[11px] text-danger">{p.error}</p>
+              )}
+              {p.status === "Failed" && (
+                <div className="mt-1.5 flex items-center gap-3">
+                  <button
+                    onClick={() => retry(p.id)}
+                    disabled={busy}
+                    className="flex items-center gap-1 text-[11.5px] font-medium text-primary hover:text-primary-hover disabled:opacity-50"
+                  >
+                    {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCw className="h-3 w-3" />} Retry
+                  </button>
+                  <button
+                    onClick={() => remove(p.id)}
+                    disabled={busy}
+                    className="flex items-center gap-1 text-[11.5px] font-medium text-text-muted hover:text-danger disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3 w-3" /> Remove
+                  </button>
+                </div>
+              )}
             </div>
             <Badge variant={statusVariant[p.status]}>{p.status}</Badge>
           </div>

@@ -11,18 +11,13 @@ export interface ScheduledPost {
   date: string;
   time: string;
   day: number;
+  month: number; // 0-indexed
+  year: number;
   voiceover?: boolean;
+  error?: string | null;
 }
 
-export const posts: ScheduledPost[] = [
-  { id: "p1", title: "3 signs your funnel is leaking", platform: "Instagram", type: "Reel", status: "Scheduled", date: "2026-07-24", time: "5:00 PM", day: 24, voiceover: true },
-  { id: "p2", title: "Client testimonial — Hamza Traders", platform: "Facebook", type: "Static Graphic", status: "Draft", date: "2026-07-25", time: "9:00 AM", day: 25 },
-  { id: "p3", title: "How AI qualifies leads in 30s", platform: "TikTok", type: "Reel", status: "Scheduled", date: "2026-07-26", time: "2:00 PM", day: 26, voiceover: true },
-  { id: "p4", title: "Behind the scenes: automation setup", platform: "Instagram", type: "Story", status: "Generating", date: "2026-07-26", time: "6:30 PM", day: 26, voiceover: true },
-  { id: "p5", title: "5 automation myths debunked", platform: "LinkedIn", type: "Carousel", status: "Scheduled", date: "2026-07-28", time: "11:00 AM", day: 28 },
-  { id: "p6", title: "Weekly automation tip #12", platform: "Instagram", type: "Reel", status: "Published", date: "2026-07-21", time: "4:00 PM", day: 21, voiceover: true },
-  { id: "p7", title: "Case study teaser", platform: "Facebook", type: "Static Graphic", status: "Failed", date: "2026-07-22", time: "10:00 AM", day: 22 },
-];
+// NOTE: mock data removed — the Scheduler page fetches real posts from /social/posts.
 
 export const platformStyle: Record<Platform, { bg: string; text: string }> = {
   Instagram: { bg: "bg-danger-muted", text: "text-danger" },
@@ -106,6 +101,9 @@ export function mapApiPost(post: ApiPost): ScheduledPost {
     date: date.toISOString().slice(0, 10),
     time: date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
     day: date.getDate(),
+    month: date.getMonth(),
+    year: date.getFullYear(),
     voiceover: post.useVoiceover,
+    error: post.error,
   };
 }

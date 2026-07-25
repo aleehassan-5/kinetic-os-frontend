@@ -1,25 +1,27 @@
 import { cn } from "@/lib/utils";
 import { platformStyle, ScheduledPost } from "./data";
 
-const now = new Date();
-const DAYS_IN_MONTH = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-const START_WEEKDAY = (new Date(now.getFullYear(), now.getMonth(), 1).getDay() + 6) % 7; // convert Sun=0 to Mon=0
 const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const TODAY = now.getDate();
 
 export function CalendarGrid({
+  viewDate,
   selectedDay,
   onSelect,
   posts,
 }: {
+  viewDate: Date;
   selectedDay: number | null;
   onSelect: (day: number) => void;
   posts: ScheduledPost[];
 }) {
-  const cells: (number | null)[] = [
-    ...Array(START_WEEKDAY).fill(null),
-    ...Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1),
-  ];
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startWeekday = (new Date(year, month, 1).getDay() + 6) % 7; // Sun=0 -> Mon=0
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+  const cells: (number | null)[] = [...Array(startWeekday).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
@@ -33,8 +35,8 @@ export function CalendarGrid({
       </div>
       <div className="grid grid-cols-7">
         {cells.map((day, i) => {
-          const dayPosts = day ? posts.filter((p) => p.day === day) : [];
-          const isToday = day === TODAY;
+          const dayPosts = day ? posts.filter((p) => p.day === day && p.month === month && p.year === year) : [];
+          const isToday = isCurrentMonth && day === today.getDate();
           const isSelected = day === selectedDay;
           return (
             <button

@@ -46,7 +46,10 @@ export function MeetingList({ meetings }: { meetings: Meeting[] }) {
                 </div>
               </div>
               {m.status === "Confirmed" && (
-                <button className="flex shrink-0 items-center gap-1 rounded-control border border-border px-2.5 py-1.5 text-[11.5px] font-medium text-text-secondary transition-colors duration-200 hover:border-border-strong hover:text-text-primary">
+                <button
+                  onClick={() => window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer")}
+                  className="flex shrink-0 items-center gap-1 rounded-control border border-border px-2.5 py-1.5 text-[11.5px] font-medium text-text-secondary transition-colors duration-200 hover:border-border-strong hover:text-text-primary"
+                >
                   <Video className="h-3 w-3" /> Join
                 </button>
               )}

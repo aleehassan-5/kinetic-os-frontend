@@ -29,6 +29,7 @@ export default function CalendarPage() {
             syncedCount={meetings.filter((m) => m.source === "Calendly").length}
             colorFrom="#C79A44"
             colorTo="#4C7C79"
+            manageUrl="https://calendly.com/app/"
           />
           <IntegrationCard
             name="Google Calendar"
@@ -37,6 +38,7 @@ export default function CalendarPage() {
             syncedCount={meetings.filter((m) => m.source === "Google Calendar").length}
             colorFrom="#8A8FBF"
             colorTo="#4C7C79"
+            manageUrl="https://calendar.google.com/calendar/u/0/r"
           />
         </div>
 
