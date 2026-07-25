@@ -35,8 +35,8 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Left — form */}
-      <div className="flex items-center justify-center px-6 py-12">
+      {/* Right — form (order-2 puts it second on the right on large screens) */}
+      <div className="flex items-center justify-center px-6 py-12 lg:order-2">
         <div className="w-full max-w-[380px] animate-fade-in">
           <div className="mb-9 flex items-center gap-2.5">
             <Logo />
@@ -127,11 +127,11 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right — brand panel */}
-      <div className="relative hidden overflow-hidden border-l border-border bg-surface lg:block">
+      {/* Left — brand panel */}
+      <div className="relative hidden overflow-hidden border-r border-border bg-surface lg:order-1 lg:block">
         <svg
           viewBox="0 0 32 32"
-          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-primary/[0.07]"
+          className="pointer-events-none absolute -left-28 -top-24 h-[420px] w-[420px] text-primary/[0.07]"
           aria-hidden="true"
         >
           <ellipse cx="16" cy="16" rx="13.25" ry="5.6" transform="rotate(-21 16 16)" stroke="currentColor" strokeWidth="0.35" fill="none" />

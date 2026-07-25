@@ -23,7 +23,8 @@ App runs at `http://localhost:3000` and redirects to `/login`.
 
 | Page | Description |
 |---|---|
-| `/login`, `/signup` | Auth flows, wired to the backend |
+| `/login`, `/signup` | Auth flows, wired to the backend — email/password or "Continue with Google" |
+| `/auth/callback` | Completes the Google sign-in redirect and hands off to the dashboard |
 | `/dashboard` | Stat cards, lead volume chart, channel breakdown, activity timeline |
 | `/leads` | Omni-channel lead inbox (WhatsApp, Instagram, Telegram, Messenger, Email) with intent scoring & AI-authored replies |
 | `/chat` | Knowledge-base-grounded AI assistant |
