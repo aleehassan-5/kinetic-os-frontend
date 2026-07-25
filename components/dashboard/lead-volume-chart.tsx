@@ -34,12 +34,12 @@ export function LeadVolumeChart() {
       <AreaChart data={data} margin={{ top: 10, right: 8, left: -12, bottom: 0 }}>
         <defs>
           <linearGradient id="leadsFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
+            <stop offset="0%" stopColor="#C79A44" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="#C79A44" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="repliesFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#14B8A6" stopOpacity={0.22} />
-            <stop offset="100%" stopColor="#14B8A6" stopOpacity={0} />
+            <stop offset="0%" stopColor="#4C7C79" stopOpacity={0.22} />
+            <stop offset="100%" stopColor="#4C7C79" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.06)" />
@@ -47,13 +47,13 @@ export function LeadVolumeChart() {
           dataKey="day"
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#64748B", fontSize: 12 }}
+          tick={{ fill: "#6C6A63", fontSize: 12 }}
           dy={8}
         />
-        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748B", fontSize: 12 }} width={28} />
+        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#6C6A63", fontSize: 12 }} width={28} />
         <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(255,255,255,0.1)" }} />
-        <Area type="monotone" dataKey="leads" stroke="#3B82F6" strokeWidth={2} fill="url(#leadsFill)" />
-        <Area type="monotone" dataKey="replies" stroke="#14B8A6" strokeWidth={2} fill="url(#repliesFill)" />
+        <Area type="monotone" dataKey="leads" stroke="#C79A44" strokeWidth={2} fill="url(#leadsFill)" />
+        <Area type="monotone" dataKey="replies" stroke="#4C7C79" strokeWidth={2} fill="url(#repliesFill)" />
       </AreaChart>
     </ResponsiveContainer>
   );

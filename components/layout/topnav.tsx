@@ -30,7 +30,7 @@ export function Topnav({ title, subtitle }: { title: string; subtitle?: string }
           <Menu className="h-[18px] w-[18px]" />
         </button>
         <div className="min-w-0">
-          <h1 className="truncate text-[16px] font-semibold tracking-tight text-text-primary">{title}</h1>
+          <h1 className="truncate font-display text-[17px] font-semibold tracking-tight text-text-primary">{title}</h1>
           {subtitle && <p className="hidden truncate text-[12.5px] text-text-secondary sm:block">{subtitle}</p>}
         </div>
       </div>

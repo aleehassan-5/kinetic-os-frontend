@@ -4,10 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, X, ChevronsUpDown } from "lucide-react";
+import { X, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nav } from "./nav-data";
 import { useMobileNav } from "./mobile-nav-context";
+import { Logo } from "@/components/ui/logo";
 
 export function MobileSidebar() {
   const { isOpen, close } = useMobileNav();
@@ -51,10 +52,8 @@ export function MobileSidebar() {
           >
             <div className="flex h-14 items-center justify-between gap-2.5 border-b border-border px-5">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary">
-                  <Sparkles className="h-4 w-4 text-white" strokeWidth={2.25} />
-                </div>
-                <span className="text-[14.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+                <Logo size="sm" />
+                <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
               </div>
               <button
                 onClick={close}

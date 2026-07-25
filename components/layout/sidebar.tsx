@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nav } from "./nav-data";
 import { useAuth } from "@/lib/auth-context";
+import { Logo } from "@/components/ui/logo";
 import * as React from "react";
 
 function initials(name: string) {
@@ -21,10 +22,8 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-64 flex-col border-r border-border bg-surface lg:flex">
       <div className="flex h-14 items-center gap-2.5 px-5 border-b border-border">
-        <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-primary">
-          <Sparkles className="h-4 w-4 text-white" strokeWidth={2.25} />
-        </div>
-        <span className="text-[14.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+        <Logo size="sm" />
+        <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">

@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api-client";
+import { Logo } from "@/components/ui/logo";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -37,13 +38,11 @@ export default function LoginPage() {
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-[380px] animate-fade-in">
           <div className="mb-9 flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary">
-              <Sparkles className="h-4.5 w-4.5 text-white" />
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+            <Logo />
+            <span className="font-display text-[16px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
           </div>
 
-          <h1 className="text-[22px] font-semibold tracking-tight text-text-primary">Welcome back</h1>
+          <h1 className="font-display text-[24px] font-medium tracking-tight text-text-primary">Welcome back</h1>
           <p className="mt-1.5 text-[13.5px] text-text-secondary">
             Sign in to your workspace to manage leads, chat and campaigns.
           </p>
@@ -124,6 +123,15 @@ export default function LoginPage() {
 
       {/* Right — brand panel */}
       <div className="relative hidden overflow-hidden border-l border-border bg-surface lg:block">
+        <svg
+          viewBox="0 0 32 32"
+          className="pointer-events-none absolute -right-24 -top-24 h-[420px] w-[420px] text-primary/[0.07]"
+          aria-hidden="true"
+        >
+          <ellipse cx="16" cy="16" rx="13.25" ry="5.6" transform="rotate(-21 16 16)" stroke="currentColor" strokeWidth="0.35" fill="none" />
+          <circle cx="16" cy="16" r="3.1" fill="currentColor" />
+          <circle cx="27.1" cy="8.6" r="1.7" fill="currentColor" />
+        </svg>
         <div className="absolute inset-0 flex flex-col justify-between p-12">
           <div />
           <div className="max-w-md">

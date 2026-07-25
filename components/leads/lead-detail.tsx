@@ -100,7 +100,7 @@ export function LeadDetail({ lead }: { lead: Lead }) {
                 <div
                   className={cn(
                     "max-w-[78%] rounded-card px-3.5 py-2.5 text-[13px] leading-relaxed",
-                    isOutbound ? "bg-primary text-white" : "bg-white/[0.05] text-text-primary border border-border"
+                    isOutbound ? "bg-primary text-background" : "bg-white/[0.05] text-text-primary border border-border"
                   )}
                 >
                   {isOutbound && (

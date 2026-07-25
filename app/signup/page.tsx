@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, Mail, Lock, Building2, ArrowRight } from "lucide-react";
+import { Mail, Lock, Building2, ArrowRight } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api-client";
+import { Logo } from "@/components/ui/logo";
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,11 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center px-6 py-12">
       <div className="w-full max-w-[400px] animate-fade-in">
         <div className="mb-9 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-primary">
-            <Sparkles className="h-4.5 w-4.5 text-white" />
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+          <Logo />
+          <span className="font-display text-[16px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
         </div>
 
-        <h1 className="text-[22px] font-semibold tracking-tight text-text-primary">Create your workspace</h1>
+        <h1 className="font-display text-[24px] font-medium tracking-tight text-text-primary">Create your workspace</h1>
         <p className="mt-1.5 text-[13.5px] text-text-secondary">
           Start automating leads and content in under 10 minutes.
         </p>

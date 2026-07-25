@@ -98,7 +98,7 @@ export default function ChatPage() {
                   <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                     <div className={cn(
                       "max-w-[75%] rounded-card px-4 py-3 text-[13.5px] leading-relaxed",
-                      m.role === "user" ? "bg-primary text-white" : "border border-border bg-white/[0.03] text-text-primary"
+                      m.role === "user" ? "bg-primary text-background" : "border border-border bg-white/[0.03] text-text-primary"
                     )}>
                       {m.text}
                     </div>

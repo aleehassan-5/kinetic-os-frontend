@@ -73,7 +73,7 @@ export function WorkflowCanvas({
                 markerEnd="url(#arrow)"
               />
               {e.label && (
-                <text x={midX} y={midY - 8} textAnchor="middle" fontSize="11" fill="#64748B">
+                <text x={midX} y={midY - 8} textAnchor="middle" fontSize="11" fill="#6C6A63">
                   {e.label}
                 </text>
               )}

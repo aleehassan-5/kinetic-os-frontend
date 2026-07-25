@@ -64,7 +64,7 @@ export default function KnowledgeBasePage() {
                 onClick={() => setFilter(f)}
                 className={cn(
                   "shrink-0 rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors duration-200",
-                  filter === f ? "bg-primary text-white" : "text-text-secondary hover:bg-white/[0.05]"
+                  filter === f ? "bg-primary text-background" : "text-text-secondary hover:bg-white/[0.05]"
                 )}
               >
                 {f}

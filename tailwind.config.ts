@@ -7,31 +7,36 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
-        background: "#0B0F14",
-        surface: "#111827",
-        card: "#161F2C",
+        // Warm graphite instrument panel — not pure black, slight warmth
+        background: "#0F0F12",
+        surface: "#17181C",
+        card: "#1C1D22",
         border: {
-          DEFAULT: "rgba(255,255,255,0.08)",
+          DEFAULT: "rgba(255,255,255,0.07)",
           strong: "rgba(255,255,255,0.14)",
         },
+        // Brass / orbit-ring gold — the one accent this product spends its boldness on
         primary: {
-          DEFAULT: "#3B82F6",
-          hover: "#2563EB",
-          muted: "rgba(59,130,246,0.12)",
+          DEFAULT: "#C79A44",
+          hover: "#AF8636",
+          muted: "rgba(199,154,68,0.14)",
         },
+        // Muted slate-teal — quiet supporting color, never competes with primary
         secondary: {
-          DEFAULT: "#14B8A6",
-          muted: "rgba(20,184,166,0.12)",
+          DEFAULT: "#4C7C79",
+          muted: "rgba(76,124,121,0.16)",
         },
-        success: { DEFAULT: "#22C55E", muted: "rgba(34,197,94,0.12)" },
-        warning: { DEFAULT: "#F59E0B", muted: "rgba(245,158,11,0.12)" },
-        danger: { DEFAULT: "#EF4444", muted: "rgba(239,68,68,0.12)" },
+        success: { DEFAULT: "#6FA37E", muted: "rgba(111,163,126,0.14)" },
+        warning: { DEFAULT: "#C9793B", muted: "rgba(201,121,59,0.14)" },
+        danger: { DEFAULT: "#B7503E", muted: "rgba(183,80,62,0.14)" },
         text: {
-          primary: "#F8FAFC",
-          secondary: "#94A3B8",
-          muted: "#64748B",
+          primary: "#EEEDE6",
+          secondary: "#A2A099",
+          muted: "#6C6A63",
         },
       },
       borderRadius: {
@@ -45,7 +50,7 @@ const config: Config = {
       boxShadow: {
         subtle: "0 1px 2px rgba(0,0,0,0.24), 0 1px 0 rgba(255,255,255,0.03) inset",
         elevated: "0 8px 24px rgba(0,0,0,0.35)",
-        ring: "0 0 0 3px rgba(59,130,246,0.25)",
+        ring: "0 0 0 3px rgba(199,154,68,0.28)",
       },
       transitionDuration: {
         DEFAULT: "200ms",

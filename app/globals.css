@@ -14,7 +14,7 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
   ::selection {
-    background: rgba(59, 130, 246, 0.3);
+    background: rgba(199, 154, 68, 0.3);
   }
   /* Scrollbars */
   ::-webkit-scrollbar {
@@ -35,7 +35,7 @@
     outline: none;
   }
   input::placeholder, textarea::placeholder {
-    color: #64748B;
+    color: #6C6A63;
   }
 }
 

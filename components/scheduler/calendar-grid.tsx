@@ -52,7 +52,7 @@ export function CalendarGrid({
                   <span
                     className={cn(
                       "inline-flex h-5 w-5 items-center justify-center rounded-full text-[11.5px] font-medium",
-                      isToday ? "bg-primary text-white" : "text-text-secondary"
+                      isToday ? "bg-primary text-background" : "text-text-secondary"
                     )}
                   >
                     {day}

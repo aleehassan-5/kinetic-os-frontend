@@ -27,16 +27,16 @@ export default function CalendarPage() {
             account="hello@orbitai.com"
             connected
             syncedCount={meetings.filter((m) => m.source === "Calendly").length}
-            colorFrom="#3B82F6"
-            colorTo="#14B8A6"
+            colorFrom="#C79A44"
+            colorTo="#4C7C79"
           />
           <IntegrationCard
             name="Google Calendar"
             account="hello@orbitai.com"
             connected
             syncedCount={meetings.filter((m) => m.source === "Google Calendar").length}
-            colorFrom="#F59E0B"
-            colorTo="#EF4444"
+            colorFrom="#8A8FBF"
+            colorTo="#4C7C79"
           />
         </div>
 
@@ -54,7 +54,7 @@ export default function CalendarPage() {
                 onClick={() => setFilter(f)}
                 className={cn(
                   "shrink-0 rounded-full px-2.5 py-1 text-[12px] font-medium transition-colors duration-200",
-                  filter === f ? "bg-primary text-white" : "text-text-secondary hover:bg-white/[0.05]"
+                  filter === f ? "bg-primary text-background" : "text-text-secondary hover:bg-white/[0.05]"
                 )}
               >
                 {f}
