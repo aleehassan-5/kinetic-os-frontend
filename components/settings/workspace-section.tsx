@@ -4,14 +4,57 @@ import * as React from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
+import { api, ApiError } from "@/lib/api-client";
+
+const industries = [
+  { value: "agency", label: "Marketing agency" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "realestate", label: "Real estate" },
+  { value: "saas", label: "SaaS" },
+  { value: "other", label: "Other" },
+];
+
+const timezones = [
+  { value: "Asia/Karachi", label: "(GMT+5:00) Pakistan Standard Time" },
+  { value: "Asia/Dubai", label: "(GMT+4:00) Gulf Standard Time" },
+  { value: "America/New_York", label: "(GMT-5:00) Eastern Time" },
+  { value: "Europe/London", label: "(GMT+0:00) London" },
+];
 
 export function WorkspaceSection() {
+  const { workspace, refetchMe } = useAuth();
+  const [name, setName] = React.useState(workspace?.name ?? "");
+  const [industry, setIndustry] = React.useState(workspace?.industry ?? "agency");
+  const [timezone, setTimezone] = React.useState(workspace?.timezone ?? "Asia/Karachi");
   const [saving, setSaving] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
-  function handleSave(e: React.FormEvent) {
+  React.useEffect(() => {
+    if (workspace) {
+      setName(workspace.name);
+      setIndustry(workspace.industry ?? "agency");
+      setTimezone(workspace.timezone ?? "Asia/Karachi");
+    }
+  }, [workspace]);
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    if (saving || !name.trim()) return;
     setSaving(true);
-    setTimeout(() => setSaving(false), 900);
+    setSaved(false);
+    setError(null);
+    try {
+      await api.patch("/workspace", { name: name.trim(), industry, timezone });
+      await refetchMe();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't save workspace settings. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -24,42 +67,47 @@ export function WorkspaceSection() {
       </CardHeader>
       <form onSubmit={handleSave}>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {error && (
+            <div className="sm:col-span-2 rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
+              {error}
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label>Workspace name</Label>
-            <Input defaultValue="Growth workspace" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div className="space-y-1.5">
             <Label>Workspace URL</Label>
-            <Input defaultValue="orbitai.app/growth-workspace" disabled />
+            <Input value={`orbitai.app/${workspace?.slug ?? ""}`} disabled />
           </div>
           <div className="space-y-1.5">
             <Label>Industry</Label>
             <select
-              defaultValue="agency"
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
               className="flex h-10 w-full rounded-control border border-border bg-white/[0.03] px-3.5 text-[14px] text-text-primary transition-colors duration-200 hover:border-border-strong focus:border-primary focus:outline-none"
             >
-              <option value="agency" className="bg-card">Marketing agency</option>
-              <option value="ecommerce" className="bg-card">E-commerce</option>
-              <option value="realestate" className="bg-card">Real estate</option>
-              <option value="saas" className="bg-card">SaaS</option>
-              <option value="other" className="bg-card">Other</option>
+              {industries.map((i) => (
+                <option key={i.value} value={i.value} className="bg-card">{i.label}</option>
+              ))}
             </select>
           </div>
           <div className="space-y-1.5">
             <Label>Timezone</Label>
             <select
-              defaultValue="pkt"
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
               className="flex h-10 w-full rounded-control border border-border bg-white/[0.03] px-3.5 text-[14px] text-text-primary transition-colors duration-200 hover:border-border-strong focus:border-primary focus:outline-none"
             >
-              <option value="pkt" className="bg-card">(GMT+5:00) Pakistan Standard Time</option>
-              <option value="gst" className="bg-card">(GMT+4:00) Gulf Standard Time</option>
-              <option value="est" className="bg-card">(GMT-5:00) Eastern Time</option>
-              <option value="gmt" className="bg-card">(GMT+0:00) London</option>
+              {timezones.map((t) => (
+                <option key={t.value} value={t.value} className="bg-card">{t.label}</option>
+              ))}
             </select>
           </div>
         </CardContent>
-        <div className="flex items-center justify-end border-t border-border px-5 py-4">
-          <Button type="submit" size="sm" loading={saving}>
+        <div className="flex items-center justify-end gap-3 border-t border-border px-5 py-4">
+          {saved && <span className="text-[12px] font-medium text-success">Saved</span>}
+          <Button type="submit" size="sm" loading={saving} disabled={!name.trim()}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
         </div>
