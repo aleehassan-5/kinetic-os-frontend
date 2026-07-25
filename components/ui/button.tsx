@@ -41,13 +41,35 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading, children, disabled, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, loading, children, disabled, onClick, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    // Guards against rapid repeated clicks (e.g. impatient double/triple clicking)
+    // firing the same handler multiple times before the first click has been
+    // processed. This is a defensive net on top of any per-component loading
+    // state, since not every click handler manages its own loading flag.
+    const lastClickRef = React.useRef(0);
+    const CLICK_GUARD_MS = 400;
+
+    const handleClick = React.useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        const now = Date.now();
+        if (now - lastClickRef.current < CLICK_GUARD_MS) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        lastClickRef.current = now;
+        onClick?.(e);
+      },
+      [onClick]
+    );
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || loading}
+        onClick={asChild ? onClick : handleClick}
         {...props}
       >
         {asChild ? (

@@ -13,6 +13,7 @@ import { GoogleIcon } from "@/components/ui/google-icon";
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -24,6 +25,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading || success) return; // guard against double-submit on rapid clicks
     setError(null);
     setLoading(true);
     try {
@@ -33,10 +35,10 @@ export default function SignupPage() {
         password,
         workspaceName: company,
       });
-      router.push("/dashboard");
+      setSuccess(true);
+      setTimeout(() => router.push("/dashboard"), 900);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not create your workspace. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
@@ -57,6 +59,12 @@ export default function SignupPage() {
         {error && (
           <div className="mt-5 rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 rounded-control border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-[13px] text-emerald-500 animate-slide-up">
+            Account created! Taking you to your dashboard…
           </div>
         )}
 
@@ -105,13 +113,14 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg" loading={loading}>
-            {!loading && (
+          <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading || success}>
+            {!loading && !success && (
               <>
                 Create workspace <ArrowRight className="h-4 w-4" />
               </>
             )}
             {loading && "Creating…"}
+            {success && "Account created ✓"}
           </Button>
         </form>
 

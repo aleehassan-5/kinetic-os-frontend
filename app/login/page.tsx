@@ -13,6 +13,7 @@ import { GoogleIcon } from "@/components/ui/google-icon";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,14 +22,15 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (loading || success) return; // guard against double-submit on rapid clicks
     setError(null);
     setLoading(true);
     try {
       await login(email, password);
-      router.push("/dashboard");
+      setSuccess(true);
+      setTimeout(() => router.push("/dashboard"), 700);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Invalid email or password. Please try again.");
-    } finally {
       setLoading(false);
     }
   }
@@ -51,6 +53,12 @@ export default function LoginPage() {
           {error && (
             <div className="mt-5 rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mt-5 rounded-control border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-[13px] text-emerald-500 animate-slide-up">
+              Signed in! Taking you to your dashboard…
             </div>
           )}
 
@@ -92,13 +100,14 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" size="lg" loading={loading}>
-              {!loading && (
+            <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading || success}>
+              {!loading && !success && (
                 <>
                   Sign in <ArrowRight className="h-4 w-4" />
                 </>
               )}
               {loading && "Signing in…"}
+              {success && "Signed in ✓"}
             </Button>
           </form>
 
