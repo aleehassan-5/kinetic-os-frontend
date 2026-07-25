@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Inbox as InboxIcon, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Inbox as InboxIcon, Loader2 } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { LeadRow, LeadRowSkeleton } from "@/components/leads/lead-row";
 import { LeadDetail } from "@/components/leads/lead-detail";
+import { FilterPopover, LeadFilters } from "@/components/leads/filter-popover";
 import { Channel, mapApiLead, type ApiLead } from "@/components/leads/data";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
@@ -26,19 +26,24 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Channel | "All">("All");
+  const [advanced, setAdvanced] = useState<LeadFilters>({ minIntentScore: 0, sortBy: "recent" });
 
   useEffect(() => {
     setLoading(true);
-    const params = filter === "All" ? "" : `?channel=${apiChannelFor[filter]}`;
+    const params = new URLSearchParams();
+    if (filter !== "All") params.set("channel", apiChannelFor[filter]);
+    if (advanced.minIntentScore > 0) params.set("minIntentScore", String(advanced.minIntentScore));
+    if (advanced.sortBy !== "recent") params.set("sortBy", advanced.sortBy);
+    const qs = params.toString();
     api
-      .get<{ leads: ApiLead[] }>(`/leads${params}`)
+      .get<{ leads: ApiLead[] }>(`/leads${qs ? `?${qs}` : ""}`)
       .then((data) => {
         setApiLeads(data.leads);
         setActiveId((prev) => prev ?? data.leads[0]?.id ?? null);
       })
       .catch(() => setApiLeads([]))
       .finally(() => setLoading(false));
-  }, [filter]);
+  }, [filter, advanced]);
 
   const leads = useMemo(() => apiLeads.map(mapApiLead), [apiLeads]);
   const active = leads.find((l) => l.id === activeId) ?? leads[0];
@@ -67,9 +72,7 @@ export default function LeadsPage() {
                     </button>
                   ))}
                 </div>
-                <Button variant="outline" size="icon" className="shrink-0 ml-2">
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
-                </Button>
+                <FilterPopover filters={advanced} onChange={setAdvanced} />
               </div>
 
               <div className="max-h-[640px] overflow-y-auto">

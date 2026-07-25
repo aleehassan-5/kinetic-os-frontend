@@ -5,7 +5,15 @@ import { KnowledgeDoc, typeStyle, statusVariant } from "./data";
 
 const typeIcon = { PDF: FileText, DOCX: File, URL: Globe, FAQ: HelpCircle, Sheet: FileSpreadsheet };
 
-export function DocumentTable({ docs }: { docs: KnowledgeDoc[] }) {
+export function DocumentTable({
+  docs,
+  onDelete,
+  deletingId,
+}: {
+  docs: KnowledgeDoc[];
+  onDelete?: (id: string) => void;
+  deletingId?: string | null;
+}) {
   if (docs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 px-6 py-16 text-center">
@@ -62,8 +70,17 @@ export function DocumentTable({ docs }: { docs: KnowledgeDoc[] }) {
                     <button className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary" title="Re-sync">
                       <RotateCw className="h-3.5 w-3.5" />
                     </button>
-                    <button className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-danger-muted hover:text-danger" title="Remove">
-                      <Trash2 className="h-3.5 w-3.5" />
+                    <button
+                      onClick={() => onDelete?.(doc.id)}
+                      disabled={deletingId === doc.id}
+                      className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-danger-muted hover:text-danger disabled:opacity-40"
+                      title="Remove"
+                    >
+                      {deletingId === doc.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
                     </button>
                     <button className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary">
                       <MoreHorizontal className="h-3.5 w-3.5" />

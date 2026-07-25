@@ -13,22 +13,64 @@ interface Msg {
   text: string;
 }
 
-const initialMessages: Msg[] = [
-  { role: "assistant", text: "Hi — I'm grounded on your Knowledge Base. Ask me anything about leads, pricing, or how a workflow is configured." },
-];
+interface Session {
+  id: string;
+  title: string;
+  messages: Msg[];
+  sourceCount: number;
+  createdAt: number;
+}
 
-const conversations = [{ title: "Current session", time: "now", active: true }];
+const welcomeMessage: Msg = {
+  role: "assistant",
+  text: "Hi — I'm grounded on your Knowledge Base. Ask me anything about leads, pricing, or how a workflow is configured.",
+};
+
+function newSession(): Session {
+  return {
+    id: `s-${Date.now()}`,
+    title: "New chat",
+    messages: [welcomeMessage],
+    sourceCount: 0,
+    createdAt: Date.now(),
+  };
+}
+
+function timeLabel(ts: number) {
+  const diffMin = Math.floor((Date.now() - ts) / 60000);
+  if (diffMin < 1) return "now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  return `${Math.floor(diffMin / 60)}h ago`;
+}
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Msg[]>(initialMessages);
+  const [sessions, setSessions] = useState<Session[]>([newSession()]);
+  const [activeSessionId, setActiveSessionId] = useState(sessions[0].id);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
-  const [sourceCount, setSourceCount] = useState(0);
+
+  const active = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
+
+  function updateActive(updater: (s: Session) => Session) {
+    setSessions((prev) => prev.map((s) => (s.id === activeSessionId ? updater(s) : s)));
+  }
+
+  function handleNewChat() {
+    const session = newSession();
+    setSessions((prev) => [session, ...prev]);
+    setActiveSessionId(session.id);
+    setInput("");
+  }
 
   async function send() {
     if (!input.trim() || sending) return;
-    const next = [...messages, { role: "user" as const, text: input }];
-    setMessages(next);
+    const userText = input;
+    const next = [...active.messages, { role: "user" as const, text: userText }];
+    updateActive((s) => ({
+      ...s,
+      messages: next,
+      title: s.title === "New chat" ? userText.slice(0, 40) : s.title,
+    }));
     setInput("");
     setSending(true);
     try {
@@ -37,10 +79,16 @@ export default function ChatPage() {
         "/chat",
         { history }
       );
-      setMessages([...next, { role: "assistant", text: result.reply }]);
-      setSourceCount(result.sources.length);
+      updateActive((s) => ({
+        ...s,
+        messages: [...next, { role: "assistant", text: result.reply }],
+        sourceCount: result.sources.length,
+      }));
     } catch {
-      setMessages([...next, { role: "assistant", text: "Sorry, I couldn't reach the assistant just now — please try again." }]);
+      updateActive((s) => ({
+        ...s,
+        messages: [...next, { role: "assistant", text: "Sorry, I couldn't reach the assistant just now — please try again." }],
+      }));
     } finally {
       setSending(false);
     }
@@ -56,23 +104,24 @@ export default function ChatPage() {
             {/* Conversation list */}
             <div className="border-b border-border lg:border-b-0 lg:border-r">
               <div className="p-3.5">
-                <Button variant="secondary" size="sm" className="w-full">
+                <Button variant="secondary" size="sm" className="w-full" onClick={handleNewChat}>
                   <Plus className="h-3.5 w-3.5" /> New chat
                 </Button>
               </div>
               <div className="max-h-[560px] overflow-y-auto px-2 pb-3">
-                {conversations.map((c, i) => (
+                {sessions.map((s) => (
                   <button
-                    key={i}
+                    key={s.id}
+                    onClick={() => setActiveSessionId(s.id)}
                     className={cn(
                       "flex w-full items-start gap-2.5 rounded-control px-2.5 py-2.5 text-left transition-colors duration-200",
-                      c.active ? "bg-primary-muted/40" : "hover:bg-white/[0.04]"
+                      s.id === activeSessionId ? "bg-primary-muted/40" : "hover:bg-white/[0.04]"
                     )}
                   >
                     <MessageSquare className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted" />
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-medium text-text-primary">{c.title}</p>
-                      <p className="text-[11px] text-text-muted">{c.time}</p>
+                      <p className="truncate text-[13px] font-medium text-text-primary">{s.title}</p>
+                      <p className="text-[11px] text-text-muted">{s.id === activeSessionId ? "now" : timeLabel(s.createdAt)}</p>
                     </div>
                   </button>
                 ))}
@@ -89,12 +138,12 @@ export default function ChatPage() {
                   <span className="text-[13.5px] font-medium text-text-primary">Orbit Assistant</span>
                 </div>
                 <span className="flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 text-[11.5px] text-text-secondary">
-                  <BookOpen className="h-3 w-3" /> {sourceCount} source{sourceCount === 1 ? "" : "s"} last used
+                  <BookOpen className="h-3 w-3" /> {active.sourceCount} source{active.sourceCount === 1 ? "" : "s"} last used
                 </span>
               </div>
 
               <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
-                {messages.map((m, i) => (
+                {active.messages.map((m, i) => (
                   <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                     <div className={cn(
                       "max-w-[75%] rounded-card px-4 py-3 text-[13.5px] leading-relaxed",

@@ -42,3 +42,33 @@ export const nodeStyles: Record<NodeKind, { badge: string; text: string; label: 
   action: { badge: "bg-secondary-muted", text: "text-secondary", label: "Action" },
   integration: { badge: "bg-success-muted", text: "text-success", label: "Integration" },
 };
+
+// ---- Real backend integration ------------------------------------------
+// The canvas above is an illustrative preview of the automation. What actually
+// gets saved to and executed by the backend is the graph below, expressed in
+// the shape the workflow engine understands (trigger / condition / action
+// nodes only — see workflow.types.ts on the backend).
+
+export interface BackendWorkflowGraph {
+  nodes: { id: string; type: "trigger" | "condition" | "action"; data: Record<string, unknown> }[];
+  edges: { source: string; target: string; branch?: "true" | "false" }[];
+}
+
+export const DEFAULT_BACKEND_GRAPH: BackendWorkflowGraph = {
+  nodes: [
+    { id: "trigger-1", type: "trigger", data: { event: "message_received", channel: "ANY" } },
+    { id: "condition-1", type: "condition", data: { field: "intentScore", operator: "gte", value: 60 } },
+    { id: "action-book", type: "action", data: { actionType: "calendar_book", provider: "GOOGLE_CALENDAR" } },
+    { id: "action-reply", type: "action", data: { actionType: "ai_reply" } },
+    { id: "action-crm", type: "action", data: { actionType: "crm_sync", integration: "HUBSPOT" } },
+    { id: "action-notify", type: "action", data: { actionType: "notify", template: "No reply in 10 minutes" } },
+  ],
+  edges: [
+    { source: "trigger-1", target: "condition-1" },
+    { source: "condition-1", target: "action-book", branch: "true" },
+    { source: "condition-1", target: "action-reply", branch: "false" },
+    { source: "action-book", target: "action-crm" },
+    { source: "action-reply", target: "action-crm" },
+    { source: "action-reply", target: "action-notify" },
+  ],
+};

@@ -1,13 +1,24 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Search, Bell, Plus, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMobileNav } from "./mobile-nav-context";
 import { NotificationsPanel } from "@/components/notifications/notifications-panel";
 import { api } from "@/lib/api-client";
 
-export function Topnav({ title, subtitle }: { title: string; subtitle?: string }) {
+export function Topnav({
+  title,
+  subtitle,
+  onNewWorkflow,
+}: {
+  title: string;
+  subtitle?: string;
+  /** Called instead of navigating when the "New Workflow" button is clicked (e.g. the Workflow Builder page creates one in place). */
+  onNewWorkflow?: () => void;
+}) {
+  const router = useRouter();
   const { toggle } = useMobileNav();
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [unreadCount, setUnreadCount] = React.useState(0);
@@ -58,7 +69,11 @@ export function Topnav({ title, subtitle }: { title: string; subtitle?: string }
           <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
         </div>
 
-        <Button size="sm" className="hidden sm:inline-flex">
+        <Button
+          size="sm"
+          className="hidden sm:inline-flex"
+          onClick={() => (onNewWorkflow ? onNewWorkflow() : router.push("/workflows?new=1"))}
+        >
           <Plus className="h-4 w-4" />
           New Workflow
         </Button>
