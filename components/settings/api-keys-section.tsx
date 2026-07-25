@@ -13,6 +13,8 @@ export function ApiKeysSection() {
   const [showModal, setShowModal] = React.useState(false);
   const [revokeId, setRevokeId] = React.useState<string | null>(null);
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
+  const [newKeyName, setNewKeyName] = React.useState("");
+  const [newKeyScope, setNewKeyScope] = React.useState<"Full access" | "Read only">("Read only");
 
   function handleCopy(id: string) {
     setCopiedId(id);
@@ -22,6 +24,28 @@ export function ApiKeysSection() {
   function handleRevoke() {
     setKeys((prev) => prev.filter((k) => k.id !== revokeId));
     setRevokeId(null);
+  }
+
+  function randomSuffix() {
+    return Math.random().toString(36).slice(2, 6) + Math.random().toString(36).slice(2, 6);
+  }
+
+  function handleGenerate() {
+    const name = newKeyName.trim();
+    if (!name) return;
+    const prefix = newKeyScope === "Full access" ? "sk_live_" : "sk_test_";
+    const newKey: ApiKey = {
+      id: `k${Date.now()}`,
+      name,
+      keyPreview: `${prefix}••••••••••••${randomSuffix()}`,
+      created: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      lastUsed: "Never",
+      scope: newKeyScope,
+    };
+    setKeys((prev) => [newKey, ...prev]);
+    setShowModal(false);
+    setNewKeyName("");
+    setNewKeyScope("Read only");
   }
 
   return (
@@ -103,21 +127,39 @@ export function ApiKeysSection() {
           <div className="w-full max-w-md rounded-card border border-border bg-card shadow-elevated animate-slide-up">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
               <h3 className="text-[14.5px] font-semibold text-text-primary">Generate new API key</h3>
-              <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-primary">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setNewKeyName("");
+                  setNewKeyScope("Read only");
+                }}
+                className="text-text-muted hover:text-text-primary"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="space-y-4 px-5 py-4">
               <div className="space-y-1.5">
                 <Label>Key name</Label>
-                <Input placeholder="e.g. Production backend" autoFocus />
+                <Input
+                  placeholder="e.g. Production backend"
+                  autoFocus
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>Scope</Label>
                 <div className="space-y-2">
-                  {(["Full access", "Read only"] as const).map((s, i) => (
+                  {(["Full access", "Read only"] as const).map((s) => (
                     <label key={s} className="flex cursor-pointer items-start gap-2.5 rounded-control border border-border p-3 transition-colors duration-200 hover:border-border-strong">
-                      <input type="radio" name="scope" defaultChecked={i === 1} className="mt-0.5 accent-primary" />
+                      <input
+                        type="radio"
+                        name="scope"
+                        checked={newKeyScope === s}
+                        onChange={() => setNewKeyScope(s)}
+                        className="mt-0.5 accent-primary"
+                      />
                       <div>
                         <p className="text-[13px] font-medium text-text-primary">{s}</p>
                         <p className="text-[11.5px] text-text-secondary">
@@ -130,8 +172,20 @@ export function ApiKeysSection() {
               </div>
             </div>
             <div className="flex items-center justify-end gap-2 border-t border-border px-5 py-4">
-              <Button variant="ghost" size="sm" onClick={() => setShowModal(false)}>Cancel</Button>
-              <Button size="sm" onClick={() => setShowModal(false)}>Generate key</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowModal(false);
+                  setNewKeyName("");
+                  setNewKeyScope("Read only");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleGenerate} disabled={!newKeyName.trim()}>
+                Generate key
+              </Button>
             </div>
           </div>
         </div>
