@@ -7,8 +7,9 @@ import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { ApiError } from "@/lib/api-client";
+import { ApiError, API_URL } from "@/lib/api-client";
 import { Logo } from "@/components/ui/logo";
+import { GoogleIcon } from "@/components/ui/google-icon";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -108,7 +109,12 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" size="lg">Google</Button>
+            <Button variant="secondary" size="lg" asChild>
+              <a href={`${API_URL}/auth/google`}>
+                <GoogleIcon className="h-4 w-4" />
+                Google
+              </a>
+            </Button>
             <Button variant="secondary" size="lg">Microsoft</Button>
           </div>
 

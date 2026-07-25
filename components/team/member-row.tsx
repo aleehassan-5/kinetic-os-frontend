@@ -1,6 +1,5 @@
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Member, statusVariant } from "./data";
 
 export function MemberRow({ member }: { member: Member }) {
@@ -8,7 +7,10 @@ export function MemberRow({ member }: { member: Member }) {
     <tr className="border-b border-border transition-colors duration-200 last:border-b-0 hover:bg-white/[0.02]">
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-[11px] font-semibold text-white", member.avatarColor)}>
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-background"
+            style={{ backgroundColor: member.avatarColor }}
+          >
             {member.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
           </div>
           <div className="min-w-0">

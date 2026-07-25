@@ -39,6 +39,7 @@ interface AuthContextValue {
   role: Role | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   register: (input: { name: string; email: string; password: string; workspaceName: string }) => Promise<void>;
   logout: () => Promise<void>;
   refetchMe: () => Promise<void>;
@@ -89,6 +90,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [fetchMe]
   );
 
+  // Used by /auth/callback after "Continue with Google" — the backend has
+  // already authenticated the person and handed back a token pair via redirect.
+  const loginWithTokens = useCallback(
+    async (accessToken: string, refreshToken: string) => {
+      setTokens(accessToken, refreshToken);
+      await fetchMe();
+    },
+    [fetchMe]
+  );
+
   const register = useCallback(
     async (input: { name: string; email: string; password: string; workspaceName: string }) => {
       const data = await api.post<{ user: WorkspaceUser } & AuthTokens>("/auth/register", input, { skipAuth: true });
@@ -113,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, workspace, role, loading, login, register, logout, refetchMe: fetchMe }}>
+    <AuthContext.Provider value={{ user, workspace, role, loading, login, loginWithTokens, register, logout, refetchMe: fetchMe }}>
       {children}
     </AuthContext.Provider>
   );

@@ -12,12 +12,12 @@ export interface Member {
 }
 
 export const members: Member[] = [
-  { id: "u1", name: "Are Khan", email: "are@orbitai.com", role: "Owner", status: "Active", lastActive: "Active now", avatarColor: "from-primary to-secondary" },
-  { id: "u2", name: "Zainab Malik", email: "zainab@orbitai.com", role: "Admin", status: "Active", lastActive: "12m ago", avatarColor: "from-purple-500 to-fuchsia-500" },
-  { id: "u3", name: "Bilal Ahmed", email: "bilal@orbitai.com", role: "Editor", status: "Active", lastActive: "1h ago", avatarColor: "from-blue-500 to-indigo-500" },
-  { id: "u4", name: "Noor Fatima", email: "noor@orbitai.com", role: "Editor", status: "Active", lastActive: "3h ago", avatarColor: "from-emerald-500 to-teal-500" },
-  { id: "u5", name: "Hassan Raza", email: "hassan@orbitai.com", role: "Viewer", status: "Pending", lastActive: "Invited 2d ago", avatarColor: "from-amber-500 to-orange-500" },
-  { id: "u6", name: "Ayesha Siddiqui", email: "ayesha@orbitai.com", role: "Editor", status: "Suspended", lastActive: "Suspended", avatarColor: "from-slate-500 to-slate-600" },
+  { id: "u1", name: "Are Khan", email: "are@orbitai.com", role: "Owner", status: "Active", lastActive: "Active now", avatarColor: "#C79A44" },
+  { id: "u2", name: "Zainab Malik", email: "zainab@orbitai.com", role: "Admin", status: "Active", lastActive: "12m ago", avatarColor: "#8B6F8E" },
+  { id: "u3", name: "Bilal Ahmed", email: "bilal@orbitai.com", role: "Editor", status: "Active", lastActive: "1h ago", avatarColor: "#6E82A6" },
+  { id: "u4", name: "Noor Fatima", email: "noor@orbitai.com", role: "Editor", status: "Active", lastActive: "3h ago", avatarColor: "#4C7C79" },
+  { id: "u5", name: "Hassan Raza", email: "hassan@orbitai.com", role: "Viewer", status: "Pending", lastActive: "Invited 2d ago", avatarColor: "#C9793B" },
+  { id: "u6", name: "Ayesha Siddiqui", email: "ayesha@orbitai.com", role: "Editor", status: "Suspended", lastActive: "Suspended", avatarColor: "#5B5B58" },
 ];
 
 export const roleDescriptions: Record<Role, string> = {
