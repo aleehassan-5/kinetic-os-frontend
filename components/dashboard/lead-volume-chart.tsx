@@ -2,14 +2,20 @@
 
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-const data = [
-  { day: "Mon", leads: 42, replies: 38 },
-  { day: "Tue", leads: 58, replies: 51 },
-  { day: "Wed", leads: 51, replies: 47 },
-  { day: "Thu", leads: 74, replies: 66 },
-  { day: "Fri", leads: 68, replies: 61 },
-  { day: "Sat", leads: 39, replies: 33 },
-  { day: "Sun", leads: 47, replies: 41 },
+export interface LeadVolumePoint {
+  day: string;
+  leads: number;
+  replies: number;
+}
+
+const FALLBACK_DATA: LeadVolumePoint[] = [
+  { day: "Mon", leads: 0, replies: 0 },
+  { day: "Tue", leads: 0, replies: 0 },
+  { day: "Wed", leads: 0, replies: 0 },
+  { day: "Thu", leads: 0, replies: 0 },
+  { day: "Fri", leads: 0, replies: 0 },
+  { day: "Sat", leads: 0, replies: 0 },
+  { day: "Sun", leads: 0, replies: 0 },
 ];
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -28,10 +34,11 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export function LeadVolumeChart() {
+export function LeadVolumeChart({ data }: { data?: LeadVolumePoint[] }) {
+  const chartData = data && data.length > 0 ? data : FALLBACK_DATA;
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={data} margin={{ top: 10, right: 8, left: -12, bottom: 0 }}>
+      <AreaChart data={chartData} margin={{ top: 10, right: 8, left: -12, bottom: 0 }}>
         <defs>
           <linearGradient id="leadsFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#C79A44" stopOpacity={0.28} />

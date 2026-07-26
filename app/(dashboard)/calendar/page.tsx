@@ -18,14 +18,14 @@ export default function CalendarPage() {
 
   return (
     <>
-      <Topnav title="Calendar" subtitle="Meetings synced from Calendly & Google Calendar" />
+      <Topnav title="Calendar" subtitle="Sample data — not yet wired to a live Calendly/Google Calendar sync" />
 
       <main className="space-y-6 p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2">
           <IntegrationCard
             name="Calendly"
             account="hello@orbitai.com"
-            connected
+            connected={false}
             syncedCount={meetings.filter((m) => m.source === "Calendly").length}
             colorFrom="#C79A44"
             colorTo="#4C7C79"
@@ -34,7 +34,7 @@ export default function CalendarPage() {
           <IntegrationCard
             name="Google Calendar"
             account="hello@orbitai.com"
-            connected
+            connected={false}
             syncedCount={meetings.filter((m) => m.source === "Google Calendar").length}
             colorFrom="#8A8FBF"
             colorTo="#4C7C79"
@@ -46,7 +46,7 @@ export default function CalendarPage() {
           <CardHeader>
             <div>
               <CardTitle>Upcoming &amp; recent meetings</CardTitle>
-              <CardDescription>{confirmedCount} confirmed this week, auto-booked from lead conversations</CardDescription>
+              <CardDescription>{confirmedCount} confirmed this week (sample data)</CardDescription>
             </div>
           </CardHeader>
           <div className="flex items-center gap-1.5 border-b border-border px-3.5 py-2.5">

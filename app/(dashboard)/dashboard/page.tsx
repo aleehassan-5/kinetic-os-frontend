@@ -1,30 +1,113 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Inbox, MessageCircle, CalendarCheck, TrendingUp } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
-import { StatCard } from "@/components/dashboard/stat-card";
-import { LeadVolumeChart } from "@/components/dashboard/lead-volume-chart";
+import { StatCard, StatCardSkeleton } from "@/components/dashboard/stat-card";
+import { LeadVolumeChart, type LeadVolumePoint } from "@/components/dashboard/lead-volume-chart";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api-client";
 
-const channels = [
-  { name: "WhatsApp", value: 312, pct: 38, color: "bg-success" },
-  { name: "Instagram", value: 204, pct: 25, color: "bg-primary" },
-  { name: "Email", value: 156, pct: 19, color: "bg-secondary" },
-  { name: "Telegram", value: 98, pct: 12, color: "bg-warning" },
-  { name: "Messenger", value: 48, pct: 6, color: "bg-text-muted" },
-];
+interface DashboardSummary {
+  newLeads: { value: number; deltaPct: number | null };
+  aiReplyRate: { value: number; deltaPct: number | null };
+  meetingsBooked: { value: number; deltaPct: number | null };
+  avgIntentScore: { value: number; deltaPct: number | null };
+  channelBreakdown: { channel: string; count: number; pct: number }[];
+  leadVolume7d: { date: string; leads: number; replies: number }[];
+}
+
+const CHANNEL_LABEL: Record<string, string> = {
+  WHATSAPP: "WhatsApp",
+  INSTAGRAM: "Instagram",
+  EMAIL: "Email",
+  TELEGRAM: "Telegram",
+  MESSENGER: "Messenger",
+};
+
+const CHANNEL_COLOR: Record<string, string> = {
+  WHATSAPP: "bg-success",
+  INSTAGRAM: "bg-primary",
+  EMAIL: "bg-secondary",
+  TELEGRAM: "bg-warning",
+  MESSENGER: "bg-text-muted",
+};
+
+const DAY_LABEL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function DashboardPage() {
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    setFailed(false);
+    api
+      .get<DashboardSummary>("/dashboard/summary")
+      .then((data) => setSummary(data))
+      .catch(() => setFailed(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const chartData: LeadVolumePoint[] | undefined = summary?.leadVolume7d.map((d: DashboardSummary["leadVolume7d"][number]) => ({
+    day: DAY_LABEL[new Date(d.date).getDay()],
+    leads: d.leads,
+    replies: d.replies,
+  }));
+
   return (
     <>
-      <Topnav title="Dashboard" subtitle="Live telemetry across all channels" />
+      <Topnav title="Dashboard" subtitle="Real-time metrics across all channels" />
 
       <main className="space-y-6 p-6 lg:p-8">
+        {failed && (
+          <div className="rounded-control border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-danger">
+            Couldn't load dashboard metrics from the backend. Showing nothing rather than made-up numbers —
+            check that the API is reachable and try refreshing.
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="New Leads (30d)" value="818" delta={12.4} icon={Inbox} />
-          <StatCard label="AI Reply Rate" value="94.2" suffix="%" delta={3.1} icon={MessageCircle} />
-          <StatCard label="Meetings Booked" value="146" delta={8.7} icon={CalendarCheck} />
-          <StatCard label="Avg. Intent Score" value="71" suffix="/100" delta={-2.3} icon={TrendingUp} />
+          {loading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatCard
+                label="New Leads (30d)"
+                value={String(summary?.newLeads.value ?? 0)}
+                delta={summary?.newLeads.deltaPct ?? null}
+                icon={Inbox}
+              />
+              <StatCard
+                label="AI Reply Rate"
+                value={String(summary?.aiReplyRate.value ?? 0)}
+                suffix="%"
+                delta={summary?.aiReplyRate.deltaPct ?? null}
+                icon={MessageCircle}
+              />
+              <StatCard
+                label="Meetings Booked"
+                value={String(summary?.meetingsBooked.value ?? 0)}
+                delta={summary?.meetingsBooked.deltaPct ?? null}
+                icon={CalendarCheck}
+              />
+              <StatCard
+                label="Avg. Intent Score"
+                value={String(summary?.avgIntentScore.value ?? 0)}
+                suffix="/100"
+                delta={summary?.avgIntentScore.deltaPct ?? null}
+                icon={TrendingUp}
+              />
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -40,7 +123,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <LeadVolumeChart />
+              <LeadVolumeChart data={chartData} />
             </CardContent>
           </Card>
 
@@ -52,14 +135,20 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {channels.map((c) => (
-                <div key={c.name}>
+              {!loading && (summary?.channelBreakdown.length ?? 0) === 0 && (
+                <p className="text-[12.5px] text-text-muted">No leads captured in the last 30 days yet.</p>
+              )}
+              {(summary?.channelBreakdown ?? []).map((c: DashboardSummary["channelBreakdown"][number]) => (
+                <div key={c.channel}>
                   <div className="mb-1.5 flex items-center justify-between text-[12.5px]">
-                    <span className="font-medium text-text-primary">{c.name}</span>
-                    <span className="text-text-secondary">{c.value}</span>
+                    <span className="font-medium text-text-primary">{CHANNEL_LABEL[c.channel] ?? c.channel}</span>
+                    <span className="text-text-secondary">{c.count}</span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
-                    <div className={`h-full rounded-full ${c.color}`} style={{ width: `${c.pct}%` }} />
+                    <div
+                      className={`h-full rounded-full ${CHANNEL_COLOR[c.channel] ?? "bg-text-muted"}`}
+                      style={{ width: `${c.pct}%` }}
+                    />
                   </div>
                 </div>
               ))}
@@ -72,9 +161,11 @@ export default function DashboardPage() {
             <CardHeader>
               <div>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Real-time across your automations</CardDescription>
+                <CardDescription>Sample of recent automation events</CardDescription>
               </div>
-              <Badge variant="success" dot>Live</Badge>
+              {/* Not wired to a real activity feed yet — no ActivityLog endpoint exists on the
+                  backend. Label kept honest instead of claiming "Live" like before. */}
+              <Badge variant="default" dot>Sample</Badge>
             </CardHeader>
             <CardContent>
               <ActivityTimeline />
@@ -84,7 +175,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Content Queue</CardTitle>
-              <CardDescription>Upcoming publishes</CardDescription>
+              <CardDescription>Upcoming publishes (sample)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {[
