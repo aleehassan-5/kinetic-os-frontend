@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarGrid } from "@/components/scheduler/calendar-grid";
 import { QueueList } from "@/components/scheduler/queue-list";
 import { PostComposer } from "@/components/scheduler/post-composer";
+import { ConnectedAccounts } from "@/components/scheduler/connected-accounts";
 import { ApiPost, mapApiPost, ScheduledPost } from "@/components/scheduler/data";
 import { api } from "@/lib/api-client";
 
@@ -41,6 +42,8 @@ export default function SchedulerPage() {
       <Topnav title="Social Scheduler" subtitle="Static graphics & AI-voiceover reels, planned across channels" />
 
       <main className="p-6 lg:p-8">
+        <ConnectedAccounts />
+
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={() => changeMonth(-1)}>
