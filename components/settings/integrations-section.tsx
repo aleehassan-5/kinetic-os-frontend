@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input, Label } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
-import { integrations as staticIntegrations, integrationStatusMeta, type IntegrationStatus } from "./data";
+import { integrationMeta, type ApiIntegration, type IntegrationStatus } from "./data";
 import { api, ApiError } from "@/lib/api-client";
 
 type ChannelId = "WHATSAPP" | "TELEGRAM" | "INSTAGRAM" | "MESSENGER" | "EMAIL";
@@ -32,6 +32,12 @@ const statusMap: Record<ApiConnection["status"], IntegrationStatus> = {
   ERROR: "error",
 };
 
+const integrationStatusMeta: Record<IntegrationStatus, { label: string; variant: "success" | "warning" | "danger" | "default" }> = {
+  connected: { label: "Connected", variant: "success" },
+  not_connected: { label: "Not connected", variant: "default" },
+  error: { label: "Action needed", variant: "danger" },
+};
+
 const otherCategories = ["Scheduling", "CRM"] as const;
 
 export function IntegrationsSection() {
@@ -43,6 +49,11 @@ export function IntegrationsSection() {
   const [disconnectingId, setDisconnectingId] = React.useState<ChannelId | null>(null);
   const [formError, setFormError] = React.useState<string | null>(null);
 
+  // Scheduling/CRM providers (Calendly, Google Calendar, HubSpot, Google Sheets) — read-only
+  // real status via GET /integrations. No connect UI for these yet since there's no OAuth
+  // flow wired up on the backend, unlike the channels above.
+  const [otherByType, setOtherByType] = React.useState<Record<string, ApiIntegration> | null>(null);
+
   function refresh() {
     setLoading(true);
     api
@@ -53,6 +64,13 @@ export function IntegrationsSection() {
   }
 
   React.useEffect(refresh, []);
+
+  React.useEffect(() => {
+    api
+      .get<{ integrations: ApiIntegration[] }>("/integrations")
+      .then((data) => setOtherByType(Object.fromEntries(data.integrations.map((i) => [i.type, i]))))
+      .catch(() => setOtherByType({}));
+  }, []);
 
   function openConnect(channel: ChannelId) {
     setEditingChannel(channel);
@@ -149,25 +167,40 @@ export function IntegrationsSection() {
             </div>
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {staticIntegrations
-              .filter((i) => i.category === category)
-              .map((integration) => {
-                const meta = integrationStatusMeta[integration.status];
-                return (
-                  <div key={integration.id} className="flex items-center gap-3 rounded-control border border-border p-3.5">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-control text-[13px] font-semibold ${integration.logoClassName}`}>
-                      {integration.logoInitial}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="truncate text-[13px] font-medium text-text-primary">{integration.name}</p>
-                        <Badge variant={meta.variant} dot className="shrink-0">{meta.label}</Badge>
+            {otherByType === null ? (
+              <div className="col-span-2 flex items-center justify-center gap-2 py-6 text-[13px] text-text-secondary">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+              </div>
+            ) : (
+              integrationMeta
+                .filter((i) => i.category === category)
+                .map((integration) => {
+                  const record = otherByType[integration.id];
+                  const status: IntegrationStatus = record
+                    ? record.status === "CONNECTED"
+                      ? "connected"
+                      : record.status === "ERROR"
+                        ? "error"
+                        : "not_connected"
+                    : "not_connected";
+                  const meta = integrationStatusMeta[status];
+                  return (
+                    <div key={integration.id} className="flex items-center gap-3 rounded-control border border-border p-3.5">
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-control text-[13px] font-semibold ${integration.logoClassName}`}>
+                        {integration.logoInitial}
                       </div>
-                      <p className="truncate text-[11.5px] text-text-muted">{integration.detail}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="truncate text-[13px] font-medium text-text-primary">{integration.name}</p>
+                          <Badge variant={meta.variant} dot className="shrink-0">{meta.label}</Badge>
+                        </div>
+                        <p className="truncate text-[11.5px] text-text-muted">{record?.detail ?? "Not connected"}</p>
+                      </div>
+                      <span className="shrink-0 text-[11px] text-text-muted">Setup via API</span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+            )}
           </CardContent>
         </Card>
       ))}

@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { UserPlus } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { UserPlus, Loader2 } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MemberRow } from "@/components/team/member-row";
 import { InviteModal } from "@/components/team/invite-modal";
-import { members as initialMembers, type Member, type Role } from "@/components/team/data";
+import { mapApiMember, type ApiMember, type Member, type Role } from "@/components/team/data";
 import { api, ApiError } from "@/lib/api-client";
 
-const roleToBackend: Record<Role, "ADMIN" | "EDITOR" | "VIEWER"> = {
-  Owner: "ADMIN",
+const roleToBackend: Record<Role, "OWNER" | "ADMIN" | "EDITOR" | "VIEWER"> = {
+  Owner: "OWNER",
   Admin: "ADMIN",
   Editor: "EDITOR",
   Viewer: "VIEWER",
@@ -19,23 +19,23 @@ const roleToBackend: Record<Role, "ADMIN" | "EDITOR" | "VIEWER"> = {
 
 export default function TeamPage() {
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [members, setMembers] = useState<Member[]>(initialMembers);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
   const [banner, setBanner] = useState<string | null>(null);
   const activeCount = members.filter((m) => m.status === "Active").length;
 
-  function handleInvited({ email, role }: { email: string; role: Role }) {
-    const pendingColors = ["#C79A44", "#8B6F8E", "#6E82A6", "#4C7C79", "#C9793B"];
-    const newMember: Member = {
-      id: `pending-${Date.now()}`,
-      name: email.split("@")[0],
-      email,
-      role,
-      status: "Pending",
-      lastActive: "Invited just now",
-      avatarColor: pendingColors[members.length % pendingColors.length],
-    };
-    setMembers((prev) => [...prev, newMember]);
-  }
+  const loadMembers = useCallback(() => {
+    setLoading(true);
+    api
+      .get<{ members: ApiMember[] }>("/team")
+      .then((data) => setMembers(data.members.map(mapApiMember)))
+      .catch((err) => setBanner(err instanceof ApiError ? err.message : "Couldn't load team members."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
 
   async function handleRoleChange(memberId: string, role: Role) {
     const prev = members;
@@ -78,27 +78,40 @@ export default function TeamPage() {
 
         <Card className="overflow-hidden">
           <CardContent className="p-0">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                  <th className="px-5 py-3">Member</th>
-                  <th className="px-3 py-3">Role</th>
-                  <th className="px-3 py-3">Status</th>
-                  <th className="px-3 py-3">Last active</th>
-                  <th className="px-3 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {members.map((m) => (
-                  <MemberRow key={m.id} member={m} onRoleChange={handleRoleChange} onRemove={handleRemove} />
-                ))}
-              </tbody>
-            </table>
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 p-10 text-[13px] text-text-muted">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading team…
+              </div>
+            ) : members.length === 0 ? (
+              <div className="p-10 text-center text-[13px] text-text-muted">No team members yet.</div>
+            ) : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                    <th className="px-5 py-3">Member</th>
+                    <th className="px-3 py-3">Role</th>
+                    <th className="px-3 py-3">Status</th>
+                    <th className="px-3 py-3">Last active</th>
+                    <th className="px-3 py-3" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((m) => (
+                    <MemberRow key={m.id} member={m} onRoleChange={handleRoleChange} onRemove={handleRemove} />
+                  ))}
+                </tbody>
+              </table>
+            )}
           </CardContent>
         </Card>
       </main>
 
-      {inviteOpen && <InviteModal onClose={() => setInviteOpen(false)} onInvited={handleInvited} />}
+      {inviteOpen && (
+        <InviteModal
+          onClose={() => setInviteOpen(false)}
+          onInvited={() => loadMembers()}
+        />
+      )}
     </>
   );
 }

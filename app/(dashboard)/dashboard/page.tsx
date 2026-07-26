@@ -9,6 +9,7 @@ import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
+import { mapApiPost, type ApiPost, type ScheduledPost } from "@/components/scheduler/data";
 
 interface DashboardSummary {
   newLeads: { value: number; deltaPct: number | null };
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [queue, setQueue] = useState<ScheduledPost[] | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -50,6 +52,13 @@ export default function DashboardPage() {
       .then((data) => setSummary(data))
       .catch(() => setFailed(true))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    api
+      .get<{ posts: ApiPost[] }>("/social/posts?status=SCHEDULED")
+      .then((data) => setQueue(data.posts.slice(0, 3).map(mapApiPost)))
+      .catch(() => setQueue([]));
   }, []);
 
   const chartData: LeadVolumePoint[] | undefined = summary?.leadVolume7d.map((d: DashboardSummary["leadVolume7d"][number]) => ({
@@ -161,11 +170,8 @@ export default function DashboardPage() {
             <CardHeader>
               <div>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Sample of recent automation events</CardDescription>
+                <CardDescription>Latest events across your workspace</CardDescription>
               </div>
-              {/* Not wired to a real activity feed yet — no ActivityLog endpoint exists on the
-                  backend. Label kept honest instead of claiming "Live" like before. */}
-              <Badge variant="default" dot>Sample</Badge>
             </CardHeader>
             <CardContent>
               <ActivityTimeline />
@@ -175,22 +181,24 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Content Queue</CardTitle>
-              <CardDescription>Upcoming publishes (sample)</CardDescription>
+              <CardDescription>Upcoming scheduled posts</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {[
-                { title: "3 signs your funnel is leaking", platform: "Instagram Reel", time: "Today, 5:00 PM", status: "Scheduled" },
-                { title: "Client testimonial — Hamza Traders", platform: "Facebook", time: "Tomorrow, 9:00 AM", status: "Draft" },
-                { title: "How AI qualifies leads in 30s", platform: "TikTok", time: "Fri, 2:00 PM", status: "Scheduled" },
-              ].map((item, i) => (
-                <div key={i} className="rounded-control border border-border p-3 transition-colors duration-200 hover:border-border-strong">
-                  <p className="text-[13px] font-medium text-text-primary">{item.title}</p>
-                  <div className="mt-1.5 flex items-center justify-between">
-                    <span className="text-[11.5px] text-text-muted">{item.platform} · {item.time}</span>
-                    <Badge variant={item.status === "Scheduled" ? "primary" : "default"}>{item.status}</Badge>
+              {queue === null ? (
+                <p className="text-[12.5px] text-text-muted">Loading…</p>
+              ) : queue.length === 0 ? (
+                <p className="text-[12.5px] text-text-muted">Nothing scheduled yet.</p>
+              ) : (
+                queue.map((post) => (
+                  <div key={post.id} className="rounded-control border border-border p-3 transition-colors duration-200 hover:border-border-strong">
+                    <p className="text-[13px] font-medium text-text-primary">{post.title}</p>
+                    <div className="mt-1.5 flex items-center justify-between">
+                      <span className="text-[11.5px] text-text-muted">{post.platform} · {post.date}, {post.time}</span>
+                      <Badge variant="primary">{post.status}</Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
         </div>

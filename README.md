@@ -43,12 +43,18 @@ app/                  # Next.js App Router pages
 components/
   ui/                 # Design system primitives (Button, Card, Badge, Input, Switch)
   layout/             # Sidebar, Topnav, mobile nav
-  <feature>/           # Feature-specific components + fixture data
+  <feature>/           # Feature-specific components + API type/mapper helpers in data.ts
 ```
 
 ## Backend Integration
 
-`/leads` and `/scheduler` are fully wired to the live backend API via `lib/api-client.ts`. Other pages currently render static fixture data from their local `data.ts` files — follow the same pattern to wire them up.
+All pages are wired to the live backend API via `lib/api-client.ts` — there's no page left rendering hardcoded fixture numbers as if they were real. Each `data.ts` now holds presentation-only metadata (labels, icons, colors) plus `ApiX` types and `mapApiX()` functions that convert backend responses into UI shapes; it no longer holds mock records pretending to be real data.
+
+Known, honestly-labeled gaps (not hidden behind fake data):
+
+- **Calendly / Google Calendar** show "Not connected" on `/calendar` and `/settings` — meetings are real DB rows, but there's no OAuth connect flow wired up yet to actually sync from those providers.
+- **Notification preference toggles** on `/settings` are UI-only for now — there's no backend model to persist them yet, and the page says so.
+- **No automated test suite yet** — treat this as an early-stage product, not production-hardened.
 
 ## Status
 

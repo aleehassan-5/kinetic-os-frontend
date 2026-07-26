@@ -17,7 +17,7 @@ export function NotificationsSection() {
       <CardHeader>
         <div>
           <CardTitle>Notification preferences</CardTitle>
-          <CardDescription>Choose what you get notified about, and where</CardDescription>
+          <CardDescription>Choose what you get notified about, and where (not yet saved to your account)</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="p-0">
