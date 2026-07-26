@@ -32,7 +32,7 @@ export const nav: NavSection[] = [
   {
     group: "Growth",
     items: [
-      { label: "Lead Inbox", href: "/leads", icon: Inbox, badge: "12" },
+      { label: "Lead Inbox", href: "/leads", icon: Inbox },
       { label: "AI Chat", href: "/chat", icon: MessagesSquare },
       { label: "Knowledge Base", href: "/knowledge", icon: BookOpen },
     ],

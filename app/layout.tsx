@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { RouteProgressProvider } from "@/components/layout/route-progress";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const fraunces = Fraunces({
@@ -20,7 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} dark`}>
       <body className="min-h-screen bg-background font-sans">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <RouteProgressProvider>{children}</RouteProgressProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -6,6 +6,8 @@ import { ChevronsUpDown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nav } from "./nav-data";
 import { useAuth } from "@/lib/auth-context";
+import { useNewLeadsCount } from "@/lib/use-new-leads-count";
+import { useRouteProgress } from "./route-progress";
 import { Logo } from "@/components/ui/logo";
 import * as React from "react";
 
@@ -17,6 +19,8 @@ function initials(name: string) {
 export function Sidebar() {
   const pathname = usePathname();
   const { user, workspace, logout } = useAuth();
+  const newLeadsCount = useNewLeadsCount();
+  const { start } = useRouteProgress();
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   return (
@@ -40,6 +44,8 @@ export function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch
+                    onClick={() => !active && start()}
                     className={cn(
                       "group flex items-center justify-between rounded-control px-2.5 py-[7px] text-[13.5px] font-medium transition-colors duration-200",
                       active
@@ -57,6 +63,11 @@ export function Sidebar() {
                     {"badge" in item && item.badge && (
                       <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10.5px] font-semibold text-primary">
                         {item.badge}
+                      </span>
+                    )}
+                    {item.href === "/leads" && !!newLeadsCount && (
+                      <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10.5px] font-semibold text-primary">
+                        {newLeadsCount}
                       </span>
                     )}
                   </Link>
