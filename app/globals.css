@@ -9,6 +9,16 @@
   html {
     color-scheme: dark;
   }
+  /* Native <input type="date"/"time"> pickers inherit color-scheme, and on
+     several Android WebViews a dark color-scheme date/time picker fails to
+     write the selected value back into the input (it opens fine, but
+     tapping a date does nothing visible). Forcing light just for these
+     controls sidesteps that bug — everything else on the page stays dark. */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    color-scheme: light;
+  }
   body {
     @apply bg-background text-text-primary antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";

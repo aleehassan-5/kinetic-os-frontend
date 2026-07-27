@@ -33,10 +33,15 @@ export function PostComposer({ onClose, onCreated }: { onClose: () => void; onCr
   const [error, setError] = useState<string | null>(null);
 
   const isVideo = contentType === "Reel" || contentType === "Story";
+  const linkedInVideoUnsupported = platform === "LinkedIn" && isVideo;
 
   async function submit(mode: "draft" | "generate_and_schedule") {
     if (!title.trim()) {
       setError("Give the post a title or hook first.");
+      return;
+    }
+    if (linkedInVideoUnsupported) {
+      setError("LinkedIn video posting isn't supported yet — pick Static Graphic, or choose a different platform.");
       return;
     }
     setError(null);
@@ -150,6 +155,12 @@ export function PostComposer({ onClose, onCreated }: { onClose: () => void; onCr
               <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
             </div>
           </div>
+
+          {linkedInVideoUnsupported && (
+            <p className="rounded-control border border-warning/30 bg-warning-muted px-3 py-2 text-[12px] text-warning">
+              LinkedIn doesn&apos;t support Reel/Story video posting yet — pick Static Graphic, or choose a different platform.
+            </p>
+          )}
 
           {error && <p className="text-[12.5px] text-danger">{error}</p>}
         </div>
