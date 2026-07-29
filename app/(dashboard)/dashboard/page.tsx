@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Inbox, Clock, CalendarCheck, TrendingUp } from "lucide-react";
+import { Inbox, Clock, CalendarCheck, TrendingUp, Users, Banknote } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { StatCard, StatCardSkeleton } from "@/components/dashboard/stat-card";
 import { LeadVolumeChart, type LeadVolumePoint } from "@/components/dashboard/lead-volume-chart";
@@ -12,6 +12,8 @@ import { api } from "@/lib/api-client";
 import { mapApiPost, type ApiPost, type ScheduledPost } from "@/components/scheduler/data";
 
 interface DashboardSummary {
+  customersAddedThisWeek: { value: number; deltaPct: number | null };
+  expectedRevenueThisWeek: { valueCents: number; deltaPct: number | null; customersWithValueSet: number };
   newLeads: { value: number; deltaPct: number | null };
   aiReplyRate: { value: number; deltaPct: number | null };
   hoursReclaimed: { value: number; deltaPct: number | null };
@@ -38,6 +40,12 @@ const CHANNEL_COLOR: Record<string, string> = {
 };
 
 const DAY_LABEL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(
+    cents / 100
+  );
+}
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -80,6 +88,49 @@ export default function DashboardPage() {
           </div>
         )}
 
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {loading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatCard
+                label="Customers Added This Week"
+                value={String(summary?.customersAddedThisWeek.value ?? 0)}
+                delta={summary?.customersAddedThisWeek.deltaPct ?? null}
+                icon={Users}
+              />
+              <StatCard
+                label="Expected Revenue This Week"
+                value={formatCurrency(summary?.expectedRevenueThisWeek.valueCents ?? 0)}
+                delta={summary?.expectedRevenueThisWeek.deltaPct ?? null}
+                icon={Banknote}
+              />
+              <StatCard
+                label="Hours Reclaimed (30d)"
+                value={String(summary?.hoursReclaimed.value ?? 0)}
+                suffix=" hrs"
+                delta={summary?.hoursReclaimed.deltaPct ?? null}
+                icon={Clock}
+              />
+            </>
+          )}
+        </div>
+
+        {!loading &&
+          summary &&
+          summary.customersAddedThisWeek.value > 0 &&
+          summary.expectedRevenueThisWeek.customersWithValueSet < summary.customersAddedThisWeek.value && (
+            <p className="text-[12px] text-text-muted">
+              {summary.customersAddedThisWeek.value - summary.expectedRevenueThisWeek.customersWithValueSet} of this
+              week&apos;s new customers don&apos;t have a deal value set yet — expected revenue above is a partial
+              total. Set it from a lead&apos;s detail panel.
+            </p>
+          )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {loading ? (
             <>
@@ -91,17 +142,17 @@ export default function DashboardPage() {
           ) : (
             <>
               <StatCard
-                label="New Customers (30d)"
+                label="New Inquiries (30d)"
                 value={String(summary?.newLeads.value ?? 0)}
                 delta={summary?.newLeads.deltaPct ?? null}
                 icon={Inbox}
               />
               <StatCard
-                label="Hours Reclaimed (30d)"
-                value={String(summary?.hoursReclaimed.value ?? 0)}
-                suffix=" hrs"
-                delta={summary?.hoursReclaimed.deltaPct ?? null}
-                icon={Clock}
+                label="AI Reply Rate"
+                value={String(summary?.aiReplyRate.value ?? 0)}
+                suffix="%"
+                delta={summary?.aiReplyRate.deltaPct ?? null}
+                icon={TrendingUp}
               />
               <StatCard
                 label="Meetings Booked"

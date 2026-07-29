@@ -48,6 +48,10 @@ export default function LeadsPage() {
   const leads = useMemo(() => apiLeads.map(mapApiLead), [apiLeads]);
   const active = leads.find((l) => l.id === activeId) ?? leads[0];
 
+  function handleLeadUpdated(updated: ApiLead) {
+    setApiLeads((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+  }
+
   return (
     <>
       <Topnav title="Lead Inbox" subtitle="Omni-channel — WhatsApp, Instagram, Telegram, Messenger, Email" />
@@ -105,7 +109,7 @@ export default function LeadsPage() {
                   <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
                 </div>
               ) : active ? (
-                <LeadDetail key={active.id} lead={active} />
+                <LeadDetail key={active.id} lead={active} onUpdated={handleLeadUpdated} />
               ) : (
                 <div className="flex h-full items-center justify-center text-[13px] text-text-muted">
                   Select a conversation to view details

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Phone, Calendar, Sparkles, Send, MoreHorizontal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Lead, channelStyles, type ApiLeadDetail, type ApiMessage } from "./data";
+import { Lead, channelStyles, statusToApi, type ApiLead, type ApiLeadDetail, type ApiMessage } from "./data";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
 
@@ -12,14 +12,22 @@ const statusVariant: Record<Lead["status"], "default" | "primary" | "success" | 
   New: "primary",
   Replied: "default",
   Qualified: "warning",
-  Booked: "success",
+  Booked: "warning",
+  Customer: "success",
   Lost: "danger",
 };
 
-export function LeadDetail({ lead }: { lead: Lead }) {
+const STATUS_OPTIONS: Lead["status"][] = ["New", "Replied", "Qualified", "Booked", "Customer", "Lost"];
+
+export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updated: ApiLead) => void }) {
   const cs = channelStyles[lead.channel];
   const [messages, setMessages] = useState<ApiMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const [dealValueDraft, setDealValueDraft] = useState(
+    lead.dealValueCents != null ? String(lead.dealValueCents / 100) : ""
+  );
+  const [savingDealValue, setSavingDealValue] = useState(false);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -52,6 +60,31 @@ export function LeadDetail({ lead }: { lead: Lead }) {
     }
   }
 
+  async function changeStatus(newStatus: Lead["status"]) {
+    if (newStatus === lead.status || savingStatus) return;
+    setSavingStatus(true);
+    try {
+      const updated = await api.patch<ApiLead>(`/leads/${lead.id}`, { status: statusToApi[newStatus] });
+      onUpdated?.(updated);
+    } finally {
+      setSavingStatus(false);
+    }
+  }
+
+  async function saveDealValue() {
+    if (savingDealValue) return;
+    const trimmed = dealValueDraft.trim();
+    const parsed = trimmed === "" ? null : Number(trimmed);
+    if (parsed !== null && (Number.isNaN(parsed) || parsed < 0)) return;
+    setSavingDealValue(true);
+    try {
+      const updated = await api.patch<ApiLead>(`/leads/${lead.id}`, { dealValue: parsed });
+      onUpdated?.(updated);
+    } finally {
+      setSavingDealValue(false);
+    }
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -77,13 +110,53 @@ export function LeadDetail({ lead }: { lead: Lead }) {
         </div>
         <div>
           <p className="text-[11px] text-text-muted">Status</p>
-          <Badge variant={statusVariant[lead.status]} className="mt-1">{lead.status}</Badge>
+          <div className="relative mt-1 inline-block">
+            <select
+              value={lead.status}
+              disabled={savingStatus}
+              onChange={(e) => changeStatus(e.target.value as Lead["status"])}
+              className="appearance-none rounded bg-transparent pr-4 text-[11px] font-medium focus:outline-none"
+              style={{ color: "inherit" }}
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s} className="bg-card text-text-primary">
+                  {s}
+                </option>
+              ))}
+            </select>
+            <Badge variant={statusVariant[lead.status]} className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              {savingStatus ? <Loader2 className="h-3 w-3 animate-spin" /> : lead.status}
+            </Badge>
+          </div>
         </div>
         <div>
           <p className="text-[11px] text-text-muted">Assigned</p>
           <p className="mt-0.5 text-[13px] font-medium text-text-primary">AI Agent</p>
         </div>
       </div>
+
+      {lead.status === "Customer" && (
+        <div className="border-b border-border px-5 py-3">
+          <label className="text-[11px] text-text-muted">
+            Deal value (USD) — feeds the &quot;Expected Revenue&quot; dashboard metric
+          </label>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="text-[13px] text-text-muted">$</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={dealValueDraft}
+              onChange={(e) => setDealValueDraft(e.target.value)}
+              onBlur={saveDealValue}
+              onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
+              placeholder="e.g. 1500"
+              className="h-8 w-28 rounded-control border border-border bg-white/[0.03] px-2 text-[13px] text-text-primary focus:border-primary focus:outline-none"
+            />
+            {savingDealValue && <Loader2 className="h-3.5 w-3.5 animate-spin text-text-muted" />}
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
         {loading ? (

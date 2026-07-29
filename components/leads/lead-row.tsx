@@ -12,7 +12,8 @@ const statusVariant: Record<Lead["status"], "default" | "primary" | "success" | 
   New: "primary",
   Replied: "default",
   Qualified: "warning",
-  Booked: "success",
+  Booked: "warning",
+  Customer: "success",
   Lost: "danger",
 };
 

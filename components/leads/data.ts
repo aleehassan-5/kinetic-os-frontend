@@ -7,7 +7,8 @@ export interface Lead {
   channel: Channel;
   message: string;
   intent: number;
-  status: "New" | "Replied" | "Qualified" | "Booked" | "Lost";
+  status: "New" | "Replied" | "Qualified" | "Booked" | "Customer" | "Lost";
+  dealValueCents: number | null;
   time: string;
   avatarColor: string;
 }
@@ -32,6 +33,7 @@ export interface ApiLead {
   phone: string | null;
   intentScore: number;
   status: "NEW" | "ENGAGED" | "QUALIFIED" | "MEETING_BOOKED" | "CLOSED" | "LOST";
+  dealValueCents: number | null;
   lastMessageAt: string | null;
   createdAt: string;
 }
@@ -66,8 +68,17 @@ const statusMap: Record<ApiLead["status"], Lead["status"]> = {
   ENGAGED: "Replied",
   QUALIFIED: "Qualified",
   MEETING_BOOKED: "Booked",
-  CLOSED: "Booked",
+  CLOSED: "Customer",
   LOST: "Lost",
+};
+
+export const statusToApi: Record<Lead["status"], ApiLead["status"]> = {
+  New: "NEW",
+  Replied: "ENGAGED",
+  Qualified: "QUALIFIED",
+  Booked: "MEETING_BOOKED",
+  Customer: "CLOSED",
+  Lost: "LOST",
 };
 
 const avatarPalette = [
@@ -105,6 +116,7 @@ export function mapApiLead(lead: ApiLead): Lead {
     message: "",
     intent: lead.intentScore,
     status: statusMap[lead.status],
+    dealValueCents: lead.dealValueCents,
     time: timeAgo(lead.lastMessageAt ?? lead.createdAt),
     avatarColor: avatarColorFor(lead.id),
   };
