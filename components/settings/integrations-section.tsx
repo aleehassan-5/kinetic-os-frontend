@@ -9,6 +9,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { integrationMeta, type ApiIntegration, type IntegrationStatus } from "./data";
 import { api, ApiError } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 
 type ChannelId = "WHATSAPP" | "TELEGRAM" | "INSTAGRAM" | "MESSENGER" | "EMAIL";
 
@@ -40,6 +41,48 @@ const integrationStatusMeta: Record<IntegrationStatus, { label: string; variant:
 
 const otherCategories = ["Scheduling", "CRM"] as const;
 
+const setupInstructions: Record<ChannelId, React.ReactNode> = {
+  WHATSAPP: (
+    <>
+      Go to <strong>developers.facebook.com</strong> → My Apps → your app → WhatsApp → API Setup. You&apos;ll see a
+      &quot;Phone number ID&quot; and a temporary access token right there — copy both below.
+    </>
+  ),
+  TELEGRAM: (
+    <>
+      Open Telegram, search for <strong>@BotFather</strong>, send <code>/newbot</code>, and follow the prompts.
+      BotFather will reply with a token that looks like <code>123456:ABC-DEF...</code> — paste it below.
+    </>
+  ),
+  INSTAGRAM: (
+    <>
+      Go to <strong>developers.facebook.com</strong> → My Apps → your app → Messenger → Settings, connect your
+      Instagram-linked Facebook Page, then copy the Page ID and generate a Page Access Token there.
+    </>
+  ),
+  MESSENGER: (
+    <>
+      Go to <strong>developers.facebook.com</strong> → My Apps → your app → Messenger → Settings, connect your
+      Facebook Page, then copy the Page ID and generate a Page Access Token there.
+    </>
+  ),
+  EMAIL: <>Enter the email address you want replies to appear to come from.</>,
+};
+
+function hasRequiredFields(channel: ChannelId, fields: Record<string, string>): boolean {
+  switch (channel) {
+    case "WHATSAPP":
+      return Boolean(fields.phoneNumberId && fields.accessToken);
+    case "TELEGRAM":
+      return Boolean(fields.botToken);
+    case "INSTAGRAM":
+    case "MESSENGER":
+      return Boolean(fields.pageId && fields.pageAccessToken);
+    case "EMAIL":
+      return Boolean(fields.fromAddress);
+  }
+}
+
 export function IntegrationsSection() {
   const [connections, setConnections] = React.useState<ApiConnection[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -48,6 +91,13 @@ export function IntegrationsSection() {
   const [saving, setSaving] = React.useState(false);
   const [disconnectingId, setDisconnectingId] = React.useState<ChannelId | null>(null);
   const [formError, setFormError] = React.useState<string | null>(null);
+
+  // Guided setup: two explicit steps (fill in → test) instead of one blind
+  // "paste and save" form. testResult is cleared whenever a field changes,
+  // so a stale "Verified" can't linger after the user edits a value.
+  const [wizardStep, setWizardStep] = React.useState<1 | 2>(1);
+  const [testing, setTesting] = React.useState(false);
+  const [testResult, setTestResult] = React.useState<{ valid: boolean; detail: string } | null>(null);
 
   // Scheduling/CRM providers (Calendly, Google Calendar, HubSpot, Google Sheets) — read-only
   // real status via GET /integrations. No connect UI for these yet since there's no OAuth
@@ -76,6 +126,13 @@ export function IntegrationsSection() {
     setEditingChannel(channel);
     setFields({});
     setFormError(null);
+    setWizardStep(1);
+    setTestResult(null);
+  }
+
+  function updateField(key: string, value: string) {
+    setFields((f) => ({ ...f, [key]: value }));
+    setTestResult(null); // any edit invalidates the last test — must re-verify before saving
   }
 
   async function disconnect(channel: ChannelId) {
@@ -90,8 +147,25 @@ export function IntegrationsSection() {
     }
   }
 
+  async function runTest() {
+    if (!editingChannel || testing) return;
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await api.post<{ valid: boolean; detail: string }>("/channel-connections/test", {
+        channel: editingChannel,
+        ...fields,
+      });
+      setTestResult(result);
+    } catch (err) {
+      setTestResult({ valid: false, detail: err instanceof ApiError ? err.message : "Couldn't run the test." });
+    } finally {
+      setTesting(false);
+    }
+  }
+
   async function save() {
-    if (!editingChannel) return;
+    if (!editingChannel || !testResult?.valid) return;
     setSaving(true);
     setFormError(null);
     try {
@@ -209,32 +283,77 @@ export function IntegrationsSection() {
         open={!!editingChannel}
         onClose={() => !saving && setEditingChannel(null)}
         title={`Connect ${editingChannel ? channelMeta[editingChannel].name : ""}`}
-        description="Paste in the credentials from your own business account below."
+        description={wizardStep === 1 ? "Step 1 of 2 — where to find your credentials" : "Step 2 of 2 — verify, then connect"}
       >
-        <div className="space-y-3">
-          {editingChannel === "WHATSAPP" && (
+        <div className="space-y-4">
+          {wizardStep === 1 && editingChannel && (
             <>
-              <Field label="Phone Number ID" value={fields.phoneNumberId} onChange={(v) => setFields((f) => ({ ...f, phoneNumberId: v }))} placeholder="109876543210987" />
-              <Field label="Access Token" value={fields.accessToken} onChange={(v) => setFields((f) => ({ ...f, accessToken: v }))} placeholder="EAAG..." type="password" />
+              <div className="rounded-control border border-primary/20 bg-primary-muted px-3.5 py-3 text-[12.5px] leading-relaxed text-text-secondary">
+                {setupInstructions[editingChannel]}
+              </div>
+
+              <div className="space-y-3">
+                {editingChannel === "WHATSAPP" && (
+                  <>
+                    <Field label="Phone Number ID" value={fields.phoneNumberId} onChange={(v) => updateField("phoneNumberId", v)} placeholder="109876543210987" />
+                    <Field label="Access Token" value={fields.accessToken} onChange={(v) => updateField("accessToken", v)} placeholder="EAAG..." type="password" />
+                  </>
+                )}
+                {editingChannel === "TELEGRAM" && (
+                  <Field label="Bot Token (from @BotFather)" value={fields.botToken} onChange={(v) => updateField("botToken", v)} placeholder="123456:ABC-DEF..." type="password" />
+                )}
+                {(editingChannel === "INSTAGRAM" || editingChannel === "MESSENGER") && (
+                  <>
+                    <Field label="Page ID" value={fields.pageId} onChange={(v) => updateField("pageId", v)} placeholder="102938475610293" />
+                    <Field label="Page Access Token" value={fields.pageAccessToken} onChange={(v) => updateField("pageAccessToken", v)} placeholder="EAAG..." type="password" />
+                  </>
+                )}
+                {editingChannel === "EMAIL" && (
+                  <Field label="From address" value={fields.fromAddress} onChange={(v) => updateField("fromAddress", v)} placeholder="hello@yourbusiness.com" />
+                )}
+              </div>
+
+              <Button className="w-full" onClick={() => setWizardStep(2)} disabled={!hasRequiredFields(editingChannel, fields)}>
+                Next: Verify connection
+              </Button>
             </>
-          )}
-          {editingChannel === "TELEGRAM" && (
-            <Field label="Bot Token (from @BotFather)" value={fields.botToken} onChange={(v) => setFields((f) => ({ ...f, botToken: v }))} placeholder="123456:ABC-DEF..." type="password" />
-          )}
-          {(editingChannel === "INSTAGRAM" || editingChannel === "MESSENGER") && (
-            <>
-              <Field label="Page ID" value={fields.pageId} onChange={(v) => setFields((f) => ({ ...f, pageId: v }))} placeholder="102938475610293" />
-              <Field label="Page Access Token" value={fields.pageAccessToken} onChange={(v) => setFields((f) => ({ ...f, pageAccessToken: v }))} placeholder="EAAG..." type="password" />
-            </>
-          )}
-          {editingChannel === "EMAIL" && (
-            <Field label="From address" value={fields.fromAddress} onChange={(v) => setFields((f) => ({ ...f, fromAddress: v }))} placeholder="hello@yourbusiness.com" />
           )}
 
-          {formError && <p className="text-[12.5px] text-danger">{formError}</p>}
-          <Button className="w-full" onClick={save} loading={saving}>
-            Save connection
-          </Button>
+          {wizardStep === 2 && (
+            <>
+              <div className="rounded-control border border-border p-3.5">
+                <p className="text-[12.5px] text-text-secondary">
+                  We&apos;ll make a real call to {editingChannel === "TELEGRAM" ? "Telegram" : "Meta"}&apos;s API with what you entered — this catches a typo&apos;d token immediately instead of it silently failing later.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-3 w-full" onClick={runTest} loading={testing}>
+                  Test connection
+                </Button>
+              </div>
+
+              {testResult && (
+                <div
+                  className={cn(
+                    "rounded-control border px-3.5 py-2.5 text-[12.5px]",
+                    testResult.valid ? "border-success/30 bg-success-muted text-success" : "border-danger/30 bg-danger-muted text-danger"
+                  )}
+                >
+                  {testResult.valid ? "✓ " : "✕ "}
+                  {testResult.detail}
+                </div>
+              )}
+
+              {formError && <p className="text-[12.5px] text-danger">{formError}</p>}
+
+              <div className="flex gap-2">
+                <Button variant="ghost" className="flex-1" onClick={() => setWizardStep(1)}>
+                  Back
+                </Button>
+                <Button className="flex-1" onClick={save} loading={saving} disabled={!testResult?.valid}>
+                  Save &amp; connect
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </Modal>
     </div>
