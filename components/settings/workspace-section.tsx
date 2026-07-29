@@ -6,6 +6,7 @@ import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { api, ApiError } from "@/lib/api-client";
+import { VoiceProfileCard } from "./voice-profile-card";
 
 const industries = [
   { value: "agency", label: "Marketing agency" },
@@ -58,6 +59,7 @@ export function WorkspaceSection() {
   }
 
   return (
+    <>
     <Card className="overflow-hidden">
       <CardHeader>
         <div>
@@ -113,5 +115,7 @@ export function WorkspaceSection() {
         </div>
       </form>
     </Card>
+    <VoiceProfileCard />
+    </>
   );
 }
