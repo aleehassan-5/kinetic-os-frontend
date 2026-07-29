@@ -66,7 +66,7 @@ export function MobileSidebar() {
             <div className="flex h-14 items-center justify-between gap-2.5 border-b border-border px-5">
               <div className="flex items-center gap-2.5">
                 <Logo size="sm" />
-                <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+                <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Kinetic OS</span>
               </div>
               <button
                 onClick={close}

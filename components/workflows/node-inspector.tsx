@@ -69,8 +69,8 @@ export function NodeInspector({ selectedId }: { selectedId: string | null }) {
           <div className="space-y-1.5">
             <Label>Connected account</Label>
             <select className="h-10 w-full rounded-control border border-border bg-white/[0.03] px-3 text-[13px] text-text-primary focus:border-primary focus:outline-none">
-              <option>hello@orbitai.com (Google)</option>
-              <option>Orbit AI workspace (HubSpot)</option>
+              <option>hello@kineticos.com (Google)</option>
+              <option>Kinetic OS workspace (HubSpot)</option>
             </select>
           </div>
         )}

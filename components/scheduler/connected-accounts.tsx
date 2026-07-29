@@ -140,7 +140,7 @@ export function ConnectedAccounts() {
           </div>
           <div className="space-y-1.5">
             <Label>Display name (optional)</Label>
-            <Input placeholder="Orbit AI" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+            <Input placeholder="Kinetic OS" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
           </div>
           <label className="flex items-center gap-2 text-[12.5px] text-text-secondary">
             <input
@@ -157,7 +157,7 @@ export function ConnectedAccounts() {
           </Button>
           <p className="text-[11px] leading-relaxed text-text-muted">
             The platform access token itself (Meta/TikTok/LinkedIn API credentials) is configured once on the
-            backend — this just tells Orbit AI which of your already-authorized accounts to publish to.
+            backend — this just tells Kinetic OS which of your already-authorized accounts to publish to.
           </p>
         </div>
       </Modal>

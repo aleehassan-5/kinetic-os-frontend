@@ -62,7 +62,7 @@ export const notificationCategories: NotificationCategory[] = [
   { id: "meetings", label: "Meetings booked", description: "When a lead books a call via Calendly or Google Calendar.", email: true, push: false },
   { id: "billing", label: "Billing & usage", description: "Invoices, payment failures, and usage-limit warnings.", email: true, push: false },
   { id: "team", label: "Team activity", description: "Invites accepted, role changes, member removals.", email: false, push: false },
-  { id: "product", label: "Product updates", description: "New features and changes to Orbit AI.", email: false, push: false },
+  { id: "product", label: "Product updates", description: "New features and changes to Kinetic OS.", email: false, push: false },
 ];
 
 export interface ApiKey {

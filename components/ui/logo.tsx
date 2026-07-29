@@ -1,23 +1,16 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The Orbit AI mark: a body with a single tilted ring and one satellite
- * point riding it — literal, not a generic sparkle/bolt icon.
+ * The Kinetic OS mark: three chevrons of increasing weight and reach,
+ * reading as forward motion/acceleration — literal to "kinetic", not a
+ * generic sparkle/bolt icon.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" className={className} aria-hidden="true">
-      <ellipse
-        cx="16"
-        cy="16"
-        rx="13.25"
-        ry="5.6"
-        transform="rotate(-21 16 16)"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <circle cx="16" cy="16" r="3.1" fill="currentColor" />
-      <circle cx="27.1" cy="8.6" r="1.7" fill="currentColor" />
+      <path d="M6 22 L13 16 L6 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
+      <path d="M13.5 24 L22 16 L13.5 8" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.75" />
+      <path d="M21 26 L31 16 L21 6" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

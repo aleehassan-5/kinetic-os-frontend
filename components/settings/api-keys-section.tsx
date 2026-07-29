@@ -96,7 +96,7 @@ export function ApiKeysSection() {
         <CardHeader>
           <div>
             <CardTitle>API keys</CardTitle>
-            <CardDescription>Used to authenticate requests to the Orbit AI API</CardDescription>
+            <CardDescription>Used to authenticate requests to the Kinetic OS API</CardDescription>
           </div>
           <Button size="sm" onClick={() => setShowModal(true)}>
             <Plus className="h-3.5 w-3.5" /> Generate new key
@@ -113,7 +113,7 @@ export function ApiKeysSection() {
                 <KeyRound className="h-[18px] w-[18px] text-text-muted" />
               </div>
               <p className="text-[13px] font-medium text-text-primary">No API keys yet</p>
-              <p className="text-[11.5px] text-text-muted">Generate one to start calling the Orbit AI API.</p>
+              <p className="text-[11.5px] text-text-muted">Generate one to start calling the Kinetic OS API.</p>
             </div>
           ) : (
             <table className="w-full text-left">

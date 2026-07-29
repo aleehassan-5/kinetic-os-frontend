@@ -13,8 +13,8 @@ const fraunces = Fraunces({
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", weight: ["400", "500"] });
 
 export const metadata: Metadata = {
-  title: "Orbit AI — Automation Platform",
-  description: "Omni-channel lead engine, AI conversations, and automated content publishing.",
+  title: "Kinetic OS — Isolated Workspace Automation",
+  description: "The Isolated Workspace that runs your business's front line — every inquiry answered, every customer tracked, hours reclaimed every month.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

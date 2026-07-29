@@ -78,7 +78,7 @@ export function WorkspaceSection() {
           </div>
           <div className="space-y-1.5">
             <Label>Workspace URL</Label>
-            <Input value={`orbitai.app/${workspace?.slug ?? ""}`} disabled />
+            <Input value={`kineticos.app/${workspace?.slug ?? ""}`} disabled />
           </div>
           <div className="space-y-1.5">
             <Label>Industry</Label>

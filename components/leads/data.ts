@@ -22,7 +22,7 @@ export const channelStyles: Record<Channel, { bg: string; text: string }> = {
 
 // ---- Real backend integration ------------------------------------------
 
-/** Shape returned by GET /leads and GET /leads/:id from the Orbit AI API. */
+/** Shape returned by GET /leads and GET /leads/:id from the Kinetic OS API. */
 export interface ApiLead {
   id: string;
   channel: "WHATSAPP" | "INSTAGRAM" | "TELEGRAM" | "MESSENGER" | "EMAIL";

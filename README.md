@@ -1,10 +1,15 @@
-# Orbit AI — Frontend
+# Kinetic OS — Frontend
 
-Premium dark-theme frontend for **Orbit AI**, an omni-channel AI automation platform for leads, chat, workflows, and content scheduling.
+The Isolated Workspace: an outcome-first automation platform for small business owners — every
+channel unified into one inbox, an AI that learns the owner's tone over time, and a dashboard
+that reports in terms an owner actually feels (customers added, meetings booked, hours reclaimed),
+not raw platform metrics.
+
+Built by Lead Sync Intelligence.
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router) + React 19 + TypeScript
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
 - **Styling:** Tailwind CSS
 - **Charts:** Recharts
 - **Icons:** Lucide Icons
@@ -25,7 +30,7 @@ App runs at `http://localhost:3000` and redirects to `/login`.
 |---|---|
 | `/login`, `/signup` | Auth flows, wired to the backend — email/password or "Continue with Google" |
 | `/auth/callback` | Completes the Google sign-in redirect and hands off to the dashboard |
-| `/dashboard` | Stat cards, lead volume chart, channel breakdown, activity timeline |
+| `/dashboard` | Outcome-framed overview — new customers, hours reclaimed, meetings booked, buying intent |
 | `/leads` | Omni-channel lead inbox (WhatsApp, Instagram, Telegram, Messenger, Email) with intent scoring & AI-authored replies |
 | `/chat` | Knowledge-base-grounded AI assistant |
 | `/workflows` | Visual node-based workflow builder (trigger → score → condition → action) |
@@ -34,7 +39,7 @@ App runs at `http://localhost:3000` and redirects to `/login`.
 | `/calendar` | Meeting scheduling via Calendly / Google Calendar integrations |
 | `/team` | Team member management with role-based access |
 | `/billing` | Plan usage, invoices, payment methods (Lemon Squeezy) |
-| `/settings` | Profile, workspace, notifications, integrations, API keys |
+| `/settings` | Profile, workspace, channel connections, notifications, integrations, API keys |
 
 ## Project Structure
 
@@ -48,14 +53,19 @@ components/
 
 ## Backend Integration
 
-All pages are wired to the live backend API via `lib/api-client.ts` — there's no page left rendering hardcoded fixture numbers as if they were real. Each `data.ts` now holds presentation-only metadata (labels, icons, colors) plus `ApiX` types and `mapApiX()` functions that convert backend responses into UI shapes; it no longer holds mock records pretending to be real data.
+All pages are wired to the live backend API via `lib/api-client.ts`. Each `data.ts` holds
+presentation-only metadata (labels, icons, colors) plus `ApiX` types and `mapApiX()` functions
+that convert backend responses into UI shapes — it does not hold mock records pretending to be
+real data.
 
-Known, honestly-labeled gaps (not hidden behind fake data):
+## Product Philosophy
 
-- **Calendly / Google Calendar** show "Not connected" on `/calendar` and `/settings` — meetings are real DB rows, but there's no OAuth connect flow wired up yet to actually sync from those providers.
-- **Notification preference toggles** on `/settings` are UI-only for now — there's no backend model to persist them yet, and the page says so.
-- **No automated test suite yet** — treat this as an early-stage product, not production-hardened.
+The Business Mechanics Addendum (see project docs) sets the design rule this frontend follows:
+every screen speaks in outcomes the owner already understands, not in the mechanics underneath.
+The Dashboard, in particular, deliberately reports "hours reclaimed" and "customers added" rather
+than technical throughput numbers — the same automation, framed the way an owner actually thinks
+about progress.
 
 ## Status
 
-Actively in development. See the [backend repo](https://github.com/aleehassan-5/orbit-ai-backend) for the API.
+Actively in development. See the [backend repo](https://github.com/aleehassan-5/kinetic-os-backend) for the API.

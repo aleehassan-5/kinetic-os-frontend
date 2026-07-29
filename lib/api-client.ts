@@ -1,5 +1,5 @@
 /**
- * Central API client for the Orbit AI backend.
+ * Central API client for the Kinetic OS backend.
  *
  * - Reads the API base URL from NEXT_PUBLIC_API_URL (see .env.local.example)
  * - Attaches the access token from memory/localStorage to every request

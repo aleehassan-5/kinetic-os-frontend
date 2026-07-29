@@ -36,7 +36,7 @@ export const statusVariant: Record<PostStatus, "default" | "primary" | "success"
 
 // ---- Real backend integration ------------------------------------------
 
-/** Shape returned by GET /social/posts and POST /social/posts from the Orbit AI API. */
+/** Shape returned by GET /social/posts and POST /social/posts from the Kinetic OS API. */
 export interface ApiPost {
   id: string;
   platform: "INSTAGRAM" | "FACEBOOK" | "TIKTOK" | "LINKEDIN";

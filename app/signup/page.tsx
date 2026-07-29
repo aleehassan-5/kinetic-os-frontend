@@ -48,7 +48,7 @@ export default function SignupPage() {
       <div className="w-full max-w-[400px] animate-fade-in">
         <div className="mb-9 flex items-center gap-2.5">
           <Logo />
-          <span className="font-display text-[16px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+          <span className="font-display text-[16px] font-semibold tracking-tight text-text-primary">Kinetic OS</span>
         </div>
 
         <h1 className="font-display text-[24px] font-medium tracking-tight text-text-primary">Create your workspace</h1>

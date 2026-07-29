@@ -126,7 +126,7 @@ export function PostComposer({ onClose, onCreated }: { onClose: () => void; onCr
             <Label>Script / caption prompt</Label>
             <textarea
               rows={3}
-              placeholder="Describe what the reel should cover — Orbit AI will draft the script, caption, and generate an AI voiceover."
+              placeholder="Describe what the reel should cover — Kinetic OS will draft the script, caption, and generate an AI voiceover."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full resize-none rounded-control border border-border bg-white/[0.03] px-3.5 py-2.5 text-[13px] text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Inbox, MessageCircle, CalendarCheck, TrendingUp } from "lucide-react";
+import { Inbox, Clock, CalendarCheck, TrendingUp } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { StatCard, StatCardSkeleton } from "@/components/dashboard/stat-card";
 import { LeadVolumeChart, type LeadVolumePoint } from "@/components/dashboard/lead-volume-chart";
@@ -14,6 +14,7 @@ import { mapApiPost, type ApiPost, type ScheduledPost } from "@/components/sched
 interface DashboardSummary {
   newLeads: { value: number; deltaPct: number | null };
   aiReplyRate: { value: number; deltaPct: number | null };
+  hoursReclaimed: { value: number; deltaPct: number | null };
   meetingsBooked: { value: number; deltaPct: number | null };
   avgIntentScore: { value: number; deltaPct: number | null };
   channelBreakdown: { channel: string; count: number; pct: number }[];
@@ -69,7 +70,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Topnav title="Dashboard" subtitle="Real-time metrics across all channels" />
+      <Topnav title="Dashboard" subtitle="What changed in your business this month" />
 
       <main className="space-y-6 p-6 lg:p-8">
         {failed && (
@@ -90,17 +91,17 @@ export default function DashboardPage() {
           ) : (
             <>
               <StatCard
-                label="New Leads (30d)"
+                label="New Customers (30d)"
                 value={String(summary?.newLeads.value ?? 0)}
                 delta={summary?.newLeads.deltaPct ?? null}
                 icon={Inbox}
               />
               <StatCard
-                label="AI Reply Rate"
-                value={String(summary?.aiReplyRate.value ?? 0)}
-                suffix="%"
-                delta={summary?.aiReplyRate.deltaPct ?? null}
-                icon={MessageCircle}
+                label="Hours Reclaimed (30d)"
+                value={String(summary?.hoursReclaimed.value ?? 0)}
+                suffix=" hrs"
+                delta={summary?.hoursReclaimed.deltaPct ?? null}
+                icon={Clock}
               />
               <StatCard
                 label="Meetings Booked"
@@ -109,7 +110,7 @@ export default function DashboardPage() {
                 icon={CalendarCheck}
               />
               <StatCard
-                label="Avg. Intent Score"
+                label="Buying Intent (avg)"
                 value={String(summary?.avgIntentScore.value ?? 0)}
                 suffix="/100"
                 delta={summary?.avgIntentScore.deltaPct ?? null}

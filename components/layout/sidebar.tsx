@@ -27,7 +27,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-30 hidden h-screen w-64 flex-col border-r border-border bg-surface lg:flex">
       <div className="flex h-14 items-center gap-2.5 px-5 border-b border-border">
         <Logo size="sm" />
-        <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Orbit AI</span>
+        <span className="font-display text-[15.5px] font-semibold tracking-tight text-text-primary">Kinetic OS</span>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
