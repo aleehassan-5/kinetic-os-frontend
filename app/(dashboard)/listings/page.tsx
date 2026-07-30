@@ -42,6 +42,7 @@ export default function ListingsPage() {
   const [planningId, setPlanningId] = React.useState<string | null>(null);
   const [planResult, setPlanResult] = React.useState<{ listingTitle: string; result: ContentPlanResult } | null>(null);
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [autoNotice, setAutoNotice] = React.useState(false);
 
   function load() {
     setLoading(true);
@@ -88,6 +89,8 @@ export default function ListingsPage() {
         await api.patch(`/listings/${editing.id}`, payload);
       } else {
         await api.post("/listings", payload);
+        setAutoNotice(true);
+        setTimeout(() => setAutoNotice(false), 8000);
       }
       setShowForm(false);
       load();
@@ -133,6 +136,13 @@ export default function ListingsPage() {
       <Topnav title="Listings" subtitle="Current offers the AI content engine can promote for you" />
 
       <main className="space-y-4 p-6 lg:p-8">
+        {autoNotice && (
+          <div className="flex items-center gap-2 rounded-control border border-primary/25 bg-primary-muted/40 px-4 py-2.5 text-[13px] text-text-primary">
+            <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+            Kinetic OS is already drafting a few post ideas for this listing — you'll get a notification when they're ready to review.
+          </div>
+        )}
+
         <div className="flex justify-end">
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4" /> Add listing
