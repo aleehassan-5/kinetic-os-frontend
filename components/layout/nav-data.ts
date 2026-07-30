@@ -9,6 +9,7 @@ import {
   Users2,
   CreditCard,
   Settings,
+  Building2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ export const nav: NavSection[] = [
       { label: "Lead Inbox", href: "/leads", icon: Inbox },
       { label: "AI Chat", href: "/chat", icon: MessagesSquare },
       { label: "Knowledge Base", href: "/knowledge", icon: BookOpen },
+      { label: "Listings", href: "/listings", icon: Building2 },
     ],
   },
   {
