@@ -66,7 +66,13 @@ const setupInstructions: Record<ChannelId, React.ReactNode> = {
       Facebook Page, then copy the Page ID and generate a Page Access Token there.
     </>
   ),
-  EMAIL: <>Enter the email address you want replies to appear to come from.</>,
+  EMAIL: (
+    <>
+      Email sends through one shared mail account this deployment is already configured with (set up by whoever
+      manages the server) — this just confirms it&apos;s working and records the address replies should appear to
+      come from.
+    </>
+  ),
 };
 
 function hasRequiredFields(channel: ChannelId, fields: Record<string, string>): boolean {
