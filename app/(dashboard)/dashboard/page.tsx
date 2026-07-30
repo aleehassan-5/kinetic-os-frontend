@@ -6,6 +6,7 @@ import { Topnav } from "@/components/layout/topnav";
 import { StatCard, StatCardSkeleton } from "@/components/dashboard/stat-card";
 import { LeadVolumeChart, type LeadVolumePoint } from "@/components/dashboard/lead-volume-chart";
 import { ActivityTimeline } from "@/components/dashboard/activity-timeline";
+import { OpsCheckin } from "@/components/dashboard/ops-checkin";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
@@ -81,6 +82,8 @@ export default function DashboardPage() {
       <Topnav title="Dashboard" subtitle="What changed in your business this month" />
 
       <main className="space-y-6 p-6 lg:p-8">
+        <OpsCheckin />
+
         {failed && (
           <div className="rounded-control border border-danger/30 bg-danger/5 px-4 py-3 text-[13px] text-danger">
             Couldn't load dashboard metrics from the backend. Showing nothing rather than made-up numbers —
