@@ -3,10 +3,69 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Warm cream instrument panel — the light counterpart of the dark theme below */
+    --color-background: #FAF8F3;
+    --color-surface: #F2EFE7;
+    --color-card: #FFFFFF;
+    --color-border: rgba(23,22,18,0.09);
+    --color-border-strong: rgba(23,22,18,0.16);
+
+    --color-primary: #AF8636;
+    --color-primary-hover: #96712B;
+    --color-primary-muted: rgba(175,134,54,0.12);
+
+    --color-secondary: #3D6663;
+    --color-secondary-muted: rgba(61,102,99,0.14);
+
+    --color-success: #4F8760;
+    --color-success-muted: rgba(79,135,96,0.12);
+    --color-warning: #B2662C;
+    --color-warning-muted: rgba(178,102,44,0.12);
+    --color-danger: #A2402F;
+    --color-danger-muted: rgba(162,64,47,0.12);
+
+    --color-text-primary: #1C1B17;
+    --color-text-secondary: #5B594F;
+    --color-text-muted: #8B8879;
+  }
+
+  .dark {
+    /* Warm graphite instrument panel — not pure black, slight warmth */
+    --color-background: #0F0F12;
+    --color-surface: #17181C;
+    --color-card: #1C1D22;
+    --color-border: rgba(255,255,255,0.07);
+    --color-border-strong: rgba(255,255,255,0.14);
+
+    /* Brass / orbit-ring gold — the one accent this product spends its boldness on */
+    --color-primary: #C79A44;
+    --color-primary-hover: #AF8636;
+    --color-primary-muted: rgba(199,154,68,0.14);
+
+    /* Muted slate-teal — quiet supporting color, never competes with primary */
+    --color-secondary: #4C7C79;
+    --color-secondary-muted: rgba(76,124,121,0.16);
+
+    --color-success: #6FA37E;
+    --color-success-muted: rgba(111,163,126,0.14);
+    --color-warning: #C9793B;
+    --color-warning-muted: rgba(201,121,59,0.14);
+    --color-danger: #B7503E;
+    --color-danger-muted: rgba(183,80,62,0.14);
+
+    --color-text-primary: #EEEDE6;
+    --color-text-secondary: #A2A099;
+    --color-text-muted: #6C6A63;
+  }
+
   * {
     @apply border-border;
   }
   html {
+    color-scheme: light dark;
+  }
+  html.dark {
     color-scheme: dark;
   }
   /* Native <input type="date"/"time"> pickers inherit color-scheme, and on

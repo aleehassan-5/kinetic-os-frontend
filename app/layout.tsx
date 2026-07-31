@@ -3,6 +3,7 @@ import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { RouteProgressProvider } from "@/components/layout/route-progress";
+import { ThemeProvider, themeInitScript } from "@/lib/theme-context";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const fraunces = Fraunces({
@@ -20,10 +21,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable} ${jetbrainsMono.variable} dark`}>
+      <head>
+        {/* Sets the right theme class before first paint so switching themes doesn't flash the old one. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen bg-background font-sans">
-        <AuthProvider>
-          <RouteProgressProvider>{children}</RouteProgressProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <RouteProgressProvider>{children}</RouteProgressProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

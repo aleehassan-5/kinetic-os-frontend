@@ -11,17 +11,6 @@ export function formatNumber(n: number) {
 
 export function timeAgo(date: Date) {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-  const map: [number, string][] = [
-    [60, "s"],
-    [60, "m"],
-    [24, "h"],
-    [7, "d"],
-  ];
-  let value = seconds;
-  let unit = "s";
-  const divisors = [60, 60, 24, 7];
-  const units = ["s", "m", "h", "d"];
-  let i = 0;
   let remaining = seconds;
   if (remaining < 60) return `${remaining}s ago`;
   remaining = Math.floor(remaining / 60);
