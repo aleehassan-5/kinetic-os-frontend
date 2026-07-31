@@ -80,7 +80,12 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/forgot-password" className="text-[12.5px] font-medium text-primary hover:text-primary-hover">
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
                 <Input
@@ -112,15 +117,12 @@ export default function LoginPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="secondary" size="lg" asChild>
-              <a href={`${API_URL}/auth/google`}>
-                <GoogleIcon className="h-4 w-4" />
-                Google
-              </a>
-            </Button>
-            <Button variant="secondary" size="lg">Microsoft</Button>
-          </div>
+          <Button variant="secondary" size="lg" className="w-full" asChild>
+            <a href={`${API_URL}/auth/google`}>
+              <GoogleIcon className="h-4 w-4" />
+              Continue with Google
+            </a>
+          </Button>
 
           <p className="mt-8 text-center text-[13px] text-text-secondary">
             Don&apos;t have a workspace?{" "}
