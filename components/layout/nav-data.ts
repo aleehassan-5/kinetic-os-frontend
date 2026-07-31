@@ -10,6 +10,7 @@ import {
   CreditCard,
   Settings,
   Building2,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,6 +54,7 @@ export const nav: NavSection[] = [
       { label: "Team", href: "/team", icon: Users2 },
       { label: "Billing", href: "/billing", icon: CreditCard },
       { label: "Settings", href: "/settings", icon: Settings },
+      { label: "Help & Guide", href: "/help", icon: HelpCircle },
     ],
   },
 ];
