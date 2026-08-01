@@ -92,13 +92,17 @@ const statusMap: Record<ApiPost["status"], PostStatus> = {
 export function mapApiPost(post: ApiPost): ScheduledPost {
   const when = post.scheduledAt ?? post.publishedAt ?? post.createdAt;
   const date = new Date(when);
+  // Build the date string from local parts (not toISOString, which is UTC) —
+  // otherwise a post scheduled late at night can show as the wrong calendar
+  // day for anyone in a timezone ahead of UTC (e.g. PKT, UTC+5).
+  const localDateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   return {
     id: post.id,
     title: post.title,
     platform: platformMap[post.platform],
     type: contentTypeMap[post.contentType],
     status: statusMap[post.status],
-    date: date.toISOString().slice(0, 10),
+    date: localDateStr,
     time: date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
     day: date.getDate(),
     month: date.getMonth(),
