@@ -477,7 +477,11 @@ export default function HelpPage() {
                   <p>
                     This is where <strong className="text-text-primary">you personally</strong> connect your own
                     WhatsApp, Instagram, Messenger, Telegram, and Email accounts — separate from any
-                    deployment-wide fallback account.
+                    deployment-wide fallback account. See the{" "}
+                    <a href="/help/integrations" className="text-primary hover:underline">
+                      API Integration Guide
+                    </a>{" "}
+                    for exactly where to get every credential this app can use, self-serve or otherwise.
                   </p>
                   <BtnList
                     items={[

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -189,6 +190,17 @@ export function IntegrationsSection() {
 
   return (
     <div className="space-y-6">
+      <Link
+        href="/help/integrations"
+        className="flex items-center justify-between rounded-control border border-primary/25 bg-primary-muted/40 px-3.5 py-3 text-[13px] text-text-primary transition-colors duration-200 hover:bg-primary-muted"
+      >
+        <span>
+          <strong className="text-primary">New to this?</strong> Full guide — where to make each account and
+          exactly what to paste in.
+        </span>
+        <span className="text-primary">→</span>
+      </Link>
+
       <Card className="overflow-hidden">
         <CardHeader>
           <div>
