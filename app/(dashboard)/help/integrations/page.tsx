@@ -175,12 +175,19 @@ export default function IntegrationsGuidePage() {
 
               <Section id="self-serve" title="Self-serve integrations (Settings → Integrations)">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  These five you can connect yourself, right now, from{" "}
+                  All of these you can connect yourself, right now, from{" "}
                   <Link href="/settings" className="text-primary hover:underline">Settings → Integrations</Link>.
-                  Click <strong className="text-text-primary">Connect</strong> on any of them — it opens a
-                  2-step wizard that shows you exactly where to find the credentials (same info as below), then
-                  makes a real test call to verify what you pasted actually works before saving it.
+                  Click <strong className="text-text-primary">Connect</strong> on any of them — it opens the same
+                  guided 2-step wizard everywhere: fill in credentials with instructions shown right there, then
+                  a real test call against that provider&apos;s API before it lets you save, so a typo gets caught
+                  immediately instead of failing silently later.
                 </p>
+                <Note>
+                  Wherever a card shows <strong>&quot;Using deployment default&quot;</strong> instead of
+                  &quot;Not connected,&quot; it means whoever manages your server already set a fallback key for
+                  the whole deployment — you can still connect your own to override it for this workspace
+                  specifically, or leave it as-is and it just works already.
+                </Note>
               </Section>
 
               <Section id="whatsapp" title="WhatsApp Business">
@@ -266,10 +273,10 @@ export default function IntegrationsGuidePage() {
 
               <Section id="deployment-level" title="Deployment-level integrations">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  Everything below this line is set up once on the server (as an environment variable), not
-                  from inside the app. If any of these matter to you and aren&apos;t working yet, this section
-                  tells you exactly what account to create and what to hand to whoever manages your deployment —
-                  you can do the account-creation part yourself and just pass along the resulting key.
+                  Everything below this line is genuinely different from the rest — these are things that only
+                  make sense to configure once per deployment (not per workspace), so they&apos;re still set up
+                  as an environment variable on the server by whoever manages it, not from inside the app. You
+                  can still do the account-creation part yourself and just hand off the resulting key.
                 </p>
               </Section>
 
@@ -293,31 +300,29 @@ export default function IntegrationsGuidePage() {
               <Section id="ai-providers" title="AI Providers (chat replies, intent scoring)">
                 <Provider
                   name="OpenAI"
-                  who="deployment"
-                  where="platform.openai.com"
+                  who="self-serve"
+                  where="platform.openai.com/api-keys"
                   steps={[
-                    "Sign up / log in at platform.openai.com.",
-                    "Add a payment method under Settings → Billing — the API isn't usable on a free trial alone for most accounts anymore.",
-                    "Settings → API Keys → Create new secret key.",
-                    "Copy it immediately — like Kinetic OS's own API keys, OpenAI only shows it once.",
+                    "Sign in at platform.openai.com/api-keys and click Create new secret key.",
+                    "Copy it immediately — OpenAI only shows it once.",
+                    "Add a card on file at platform.openai.com/settings/organization/billing — the key won't work without one.",
+                    "Paste it into Kinetic OS: Settings → Integrations → AI Providers → OpenAI → Connect.",
                   ]}
-                  envVars={["OPENAI_API_KEY", "OPENAI_CHAT_MODEL", "OPENAI_EMBEDDING_MODEL", "OPENAI_IMAGE_MODEL"]}
                   free="Pay-as-you-go, billed by usage — no meaningful free tier for production traffic."
                 />
                 <Provider
-                  name="Anthropic (alternative)"
-                  who="deployment"
-                  where="console.anthropic.com"
+                  name="Anthropic"
+                  who="self-serve"
+                  where="console.anthropic.com/settings/keys"
                   steps={[
-                    "Sign up / log in at console.anthropic.com.",
-                    "Settings → Billing → add credit.",
-                    "Settings → API Keys → Create Key.",
+                    "Sign in at console.anthropic.com/settings/keys and click Create Key.",
+                    "Copy it immediately — it's only shown once.",
+                    "Connect it the same way: Settings → Integrations → AI Providers → Anthropic → Connect.",
                   ]}
-                  envVars={["ANTHROPIC_API_KEY"]}
-                  free="Pay-as-you-go, billed by usage."
+                  free="Pay-as-you-go, billed by usage. Currently reserved for upcoming Claude-powered features."
                 />
                 <Note>
-                  Leave both blank and Kinetic OS runs in a local &quot;stub&quot; mode — deterministic
+                  Connect nothing here and Kinetic OS runs in a local &quot;stub&quot; mode — deterministic
                   placeholder replies and fake embeddings, no external calls or cost. Fine for exploring the
                   product, not for real customer conversations.
                 </Note>
@@ -326,37 +331,35 @@ export default function IntegrationsGuidePage() {
               <Section id="calendly" title="Calendly">
                 <Provider
                   name="Calendly"
-                  who="deployment"
+                  who="self-serve"
                   where="calendly.com"
                   steps={[
                     "Sign up (or log in) at calendly.com and set up at least one event type — this is the meeting slot leads will book into.",
-                    "Integrations → API & Webhooks → Personal Access Tokens → Generate New Token.",
-                    "Find your event type's URI by calling GET https://api.calendly.com/event_types with that token (or check your event type's own settings page) — it looks like https://api.calendly.com/event_types/AAAAAAAAAAAAAAAA.",
-                    "Still on the API & Webhooks page, create a webhook subscription pointing at https://your-api-domain/webhooks/calendly, subscribed to the invitee.created and invitee.canceled events, and copy its signing key.",
+                    "Integrations & apps → API & Webhooks → Personal access tokens → generate one.",
+                    "Open that event type → Edit → Share via API and copy its API URI (looks like https://api.calendly.com/event_types/AAAA...).",
+                    "Paste both into Kinetic OS: Settings → Integrations → Scheduling → Calendly → Connect.",
                   ]}
-                  envVars={["CALENDLY_ACCESS_TOKEN", "CALENDLY_EVENT_TYPE_URI", "CALENDLY_WEBHOOK_SIGNING_KEY"]}
                   free="Calendly's own free plan covers one event type, which is enough to connect this."
                 />
                 <Note>
-                  A meeting only shows up on the Calendar page once someone actually books through Calendly —
-                  the webhook is what creates that record in real time, so it has to be registered correctly for
-                  meetings to appear at all.
+                  A meeting only shows up on the Calendar page once someone actually books through Calendly — a
+                  webhook (registered automatically once you connect) is what creates that record in real time.
                 </Note>
               </Section>
 
               <Section id="google-calendar" title="Google Calendar (direct booking)">
                 <Provider
                   name="Google Calendar via Service Account"
-                  who="deployment"
+                  who="self-serve"
                   where="console.cloud.google.com"
                   steps={[
-                    "Same Google Cloud project as Google Sign-in above (or a new one) — APIs & Services → Enable APIs → enable the \"Google Calendar API\".",
+                    "Google Cloud Console → APIs & Services → Enable APIs → enable the \"Google Calendar API\".",
                     "IAM & Admin → Service Accounts → Create Service Account (this creates a robot account, not a normal login).",
-                    "Keys tab on that service account → Add Key → Create new key → JSON — this downloads a file containing the private key and the service account's email address.",
-                    "Open Google Calendar in your browser, find the specific calendar you want bookings to land on, Settings → \"Share with specific people\" → add the service account's email with \"Make changes to events\" permission.",
-                    "Copy that calendar's ID from Settings → \"Integrate calendar\" → Calendar ID (for your primary calendar this is just your Gmail address; for a secondary calendar it looks like a long string ending in @group.calendar.google.com).",
+                    "Keys tab on that service account → Add Key → Create new key → JSON — this downloads a file with the private key and the service account's email address.",
+                    "In Google Calendar, open the specific calendar you want bookings to land on → Settings → \"Share with specific people\" → add the service account's email as editor.",
+                    "Copy that calendar's ID from Settings → \"Integrate calendar\" → Calendar ID.",
+                    "Paste the whole downloaded JSON file plus the Calendar ID into Kinetic OS: Settings → Integrations → Scheduling → Google Calendar → Connect.",
                   ]}
-                  envVars={["GOOGLE_SERVICE_ACCOUNT_EMAIL", "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY", "GOOGLE_CALENDAR_ID"]}
                   free="Free — Google Calendar API has a generous free quota well beyond what a small business needs."
                 />
               </Section>
@@ -364,71 +367,78 @@ export default function IntegrationsGuidePage() {
               <Section id="crm" title="HubSpot & Google Sheets (CRM sync)">
                 <Provider
                   name="HubSpot"
-                  who="deployment"
+                  who="self-serve"
                   where="app.hubspot.com"
                   steps={[
                     "Log into your HubSpot account (or sign up for a free one).",
                     "Settings (gear icon) → Integrations → Private Apps → Create a private app.",
-                    "Name it, then under Scopes enable at least crm.objects.contacts.write and crm.objects.contacts.read.",
-                    "Create app → copy the generated access token.",
+                    "Name it, then under Scopes enable crm.objects.contacts.write.",
+                    "Create app → copy the generated access token → paste into Kinetic OS: Settings → Integrations → CRM → HubSpot → Connect.",
                   ]}
-                  envVars={["HUBSPOT_ACCESS_TOKEN"]}
                   free="HubSpot's free CRM tier is enough for this — private apps aren't gated behind a paid plan."
                 />
                 <Provider
                   name="Google Sheets"
-                  who="deployment"
+                  who="self-serve"
                   where="console.cloud.google.com"
                   steps={[
-                    "Reuses the exact same service account created for Google Calendar above — no separate account needed. Just enable the \"Google Sheets API\" on the same project (APIs & Services → Enable APIs).",
-                    "Create (or open) the spreadsheet you want leads synced into, then Share it with the service account's email (Editor access).",
-                    "Copy the spreadsheet ID from its URL — the long string between /d/ and /edit, e.g. docs.google.com/spreadsheets/d/THIS_PART/edit.",
+                    "Reuses the exact same service account created for Google Calendar above (or make a new one) — just also enable the \"Google Sheets API\" on that project.",
+                    "Open the spreadsheet you want leads synced into → Share it with the service account's email as editor.",
+                    "Copy the spreadsheet ID from its URL — the long string between /d/ and /edit.",
+                    "Paste the JSON key plus the Spreadsheet ID into Kinetic OS: Settings → Integrations → CRM → Google Sheets → Connect.",
                   ]}
-                  envVars={["GOOGLE_SHEETS_SPREADSHEET_ID"]}
                   free="Free."
                 />
               </Section>
 
               <Section id="social-publishing" title="Social Publishing (Scheduler)">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  Instagram and Facebook publishing reuse the same Meta app credentials as the DM channels
-                  above — no separate app needed, just two more IDs.
+                  All four connect from Settings → Integrations → Social Accounts. Instagram and Facebook reuse
+                  the same Meta app as the DM channels above.
                 </p>
                 <Provider
-                  name="Instagram + Facebook posting"
-                  who="deployment"
+                  name="Instagram publishing"
+                  who="self-serve"
                   where="developers.facebook.com"
                   steps={[
-                    "Same Meta app as WhatsApp/Instagram DMs — add the \"Instagram Graph API\" product if it isn't already added.",
-                    "Grab your Instagram professional account's ID (Graph API Explorer: GET /me/accounts, then GET {page-id}?fields=instagram_business_account).",
-                    "Your Facebook Page ID is visible on the Page itself (About → Page transparency), or from the same GET /me/accounts call.",
+                    "Same Meta app as WhatsApp/Instagram DMs → Instagram Graph API → generate a Page Access Token for the Facebook Page linked to your Instagram Business account.",
+                    "Copy the Instagram Business Account ID from that Page's settings.",
+                    "Paste both into Kinetic OS: Settings → Integrations → Social Accounts → Instagram → Connect.",
                   ]}
-                  envVars={["INSTAGRAM_BUSINESS_ACCOUNT_ID", "FACEBOOK_PAGE_ID"]}
                   free="Free — usage limits are generous for a single business's own posting volume."
                 />
                 <Provider
+                  name="Facebook Page publishing"
+                  who="self-serve"
+                  where="developers.facebook.com"
+                  steps={[
+                    "Same Meta app → Messenger → Settings → generate a Page Access Token for the Page you want to publish to, and copy its Page ID.",
+                    "Paste both into Kinetic OS: Settings → Integrations → Social Accounts → Facebook Page → Connect.",
+                  ]}
+                  free="Free."
+                />
+                <Provider
                   name="TikTok"
-                  who="deployment"
+                  who="self-serve"
                   where="developers.tiktok.com"
                   steps={[
-                    "Create a developer account at developers.tiktok.com.",
-                    "Manage apps → Create an app, and request access to the \"Content Posting API\" product for it.",
-                    "TikTok reviews Content Posting API access requests manually — this isn't instant approval like the others.",
-                    "Once approved, complete the OAuth flow for your own TikTok business account to get an access token.",
+                    "Create a developer account, then Manage apps → your app.",
+                    "Complete the OAuth flow with the video.publish scope to get an access token.",
+                    "TikTok reviews Content Posting API access requests manually — this isn't instant like the others, budget real time for it.",
+                    "Paste the access token into Kinetic OS: Settings → Integrations → Social Accounts → TikTok → Connect.",
                   ]}
-                  envVars={["TIKTOK_ACCESS_TOKEN"]}
-                  free="Free, but gated behind TikTok's own app review — budget real time for this one specifically."
+                  free="Free, but gated behind TikTok's own app review."
                 />
                 <Provider
                   name="LinkedIn"
-                  who="deployment"
+                  who="self-serve"
                   where="developer.linkedin.com"
                   steps={[
-                    "Create an app at developer.linkedin.com (requires an associated LinkedIn Company Page).",
-                    "Request access to the \"Share on LinkedIn\" / Community Management API product.",
-                    "Complete OAuth for your organization to get an access token, and find your organization's URN under your Page's admin settings (looks like urn:li:organization:12345678).",
+                    "Create an app (requires an associated LinkedIn Company Page) → Auth tab.",
+                    "Generate an access token with the w_organization_social scope.",
+                    "Find your organization's URN under your Page's admin settings URL (looks like urn:li:organization:12345).",
+                    "Paste both into Kinetic OS: Settings → Integrations → Social Accounts → LinkedIn → Connect.",
                   ]}
-                  envVars={["LINKEDIN_ACCESS_TOKEN", "LINKEDIN_ORGANIZATION_URN"]}
                   free="Free, also gated behind LinkedIn's own product access review."
                 />
                 <Note>
@@ -440,18 +450,18 @@ export default function IntegrationsGuidePage() {
               <Section id="elevenlabs" title="ElevenLabs (AI voiceover)">
                 <Provider
                   name="ElevenLabs"
-                  who="deployment"
+                  who="self-serve"
                   where="elevenlabs.io"
                   steps={[
                     "Sign up at elevenlabs.io.",
-                    "Profile icon (top right) → API Keys → copy your key.",
+                    "Profile icon (top right) → API Keys → Create API Key.",
+                    "Paste it into Kinetic OS: Settings → Integrations → AI Providers → ElevenLabs → Connect.",
                   ]}
-                  envVars={["ELEVENLABS_API_KEY"]}
                   free="Free tier includes a limited number of characters per month, enough to try it out."
                 />
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  Leave this blank and reels still generate — just as silent video with the script as on-screen
-                  text, no narration.
+                  Leave this disconnected and reels still generate — just as silent video with the script as
+                  on-screen text, no narration.
                 </p>
               </Section>
 
