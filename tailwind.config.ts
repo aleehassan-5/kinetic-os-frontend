@@ -1,9 +1,39 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
+/**
+ * Builds a Tailwind color value backed by a "R G B" (space-separated,
+ * no commas/rgb()) CSS variable, so opacity modifiers like `bg-primary/40`
+ * work correctly — Tailwind swaps in the requested alpha via <alpha-value>.
+ * When no modifier is given, `opacityVar` (a second CSS variable holding a
+ * fixed fraction like 0.14) supplies the token's normal default look; pass
+ * nothing for solid tokens that should just default to fully opaque.
+ */
+function withOpacity(rgbVar: string, opacityVar?: string): any {
+  return ({ opacityValue }: { opacityValue?: string }) => {
+    if (opacityValue !== undefined) return `rgb(var(${rgbVar}) / ${opacityValue})`;
+    return opacityVar ? `rgb(var(${rgbVar}) / var(${opacityVar}))` : `rgb(var(${rgbVar}))`;
+  };
+}
+
 const config: Config = {
   darkMode: "class",
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  // The legacy bg-opacity-*/text-opacity-*/etc utilities make Tailwind always
+  // wrap our color functions with its own --tw-{util}-opacity variable
+  // (defaulting to 1) instead of calling them with opacityValue: undefined,
+  // which would silently make every "-muted" token render fully opaque
+  // instead of its intended soft translucent default. Nothing in this
+  // codebase uses the legacy bg-opacity-40 style classes (only the modern
+  // bg-x/40 modifier syntax), so disabling these is safe.
+  corePlugins: {
+    backgroundOpacity: false,
+    textOpacity: false,
+    borderOpacity: false,
+    ringOpacity: false,
+    divideOpacity: false,
+    placeholderOpacity: false,
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -13,32 +43,42 @@ const config: Config = {
       },
       colors: {
         // Values come from CSS variables (see globals.css) so the whole
-        // palette can flip between the .dark and .light themes at runtime.
-        background: "var(--color-background)",
-        surface: "var(--color-surface)",
-        card: "var(--color-card)",
+        // palette can flip between the .dark and .light themes at runtime,
+        // and each one supports Tailwind opacity modifiers (e.g. primary/40).
+        background: withOpacity("--color-background"),
+        surface: withOpacity("--color-surface"),
+        card: withOpacity("--color-card"),
         border: {
-          DEFAULT: "var(--color-border)",
-          strong: "var(--color-border-strong)",
+          DEFAULT: withOpacity("--color-border", "--color-border-opacity"),
+          strong: withOpacity("--color-border-strong", "--color-border-strong-opacity"),
         },
         // Brass / orbit-ring gold — the one accent this product spends its boldness on
         primary: {
-          DEFAULT: "var(--color-primary)",
-          hover: "var(--color-primary-hover)",
-          muted: "var(--color-primary-muted)",
+          DEFAULT: withOpacity("--color-primary"),
+          hover: withOpacity("--color-primary-hover"),
+          muted: withOpacity("--color-primary-muted", "--color-primary-muted-opacity"),
         },
         // Muted slate-teal — quiet supporting color, never competes with primary
         secondary: {
-          DEFAULT: "var(--color-secondary)",
-          muted: "var(--color-secondary-muted)",
+          DEFAULT: withOpacity("--color-secondary"),
+          muted: withOpacity("--color-secondary-muted", "--color-secondary-muted-opacity"),
         },
-        success: { DEFAULT: "var(--color-success)", muted: "var(--color-success-muted)" },
-        warning: { DEFAULT: "var(--color-warning)", muted: "var(--color-warning-muted)" },
-        danger: { DEFAULT: "var(--color-danger)", muted: "var(--color-danger-muted)" },
+        success: {
+          DEFAULT: withOpacity("--color-success"),
+          muted: withOpacity("--color-success-muted", "--color-success-muted-opacity"),
+        },
+        warning: {
+          DEFAULT: withOpacity("--color-warning"),
+          muted: withOpacity("--color-warning-muted", "--color-warning-muted-opacity"),
+        },
+        danger: {
+          DEFAULT: withOpacity("--color-danger"),
+          muted: withOpacity("--color-danger-muted", "--color-danger-muted-opacity"),
+        },
         text: {
-          primary: "var(--color-text-primary)",
-          secondary: "var(--color-text-secondary)",
-          muted: "var(--color-text-muted)",
+          primary: withOpacity("--color-text-primary"),
+          secondary: withOpacity("--color-text-secondary"),
+          muted: withOpacity("--color-text-muted"),
         },
       },
       borderRadius: {
