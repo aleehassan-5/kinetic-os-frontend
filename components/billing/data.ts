@@ -25,14 +25,24 @@ export const invoiceStatusVariant: Record<InvoiceStatus, "default" | "success" |
 
 // ---- Real backend integration ------------------------------------------
 
+export interface ManualPaymentDetails {
+  whatsappNumber: string | null;
+  bank: { accountTitle: string; accountNumber: string; bankName: string } | null;
+  easypaisaNumber: string | null;
+  jazzcashNumber: string | null;
+}
+
 export interface ApiBillingOverview {
-  plan: { id: string; name: string; priceLabel: string };
+  plan: { id: string; name: string; priceLabel: string; pricePKR: number; pitchLine: string };
   subscription: {
     status: "ON_TRIAL" | "ACTIVE" | "PAUSED" | "PAST_DUE" | "UNPAID" | "CANCELLED" | "EXPIRED";
     renewsAt: string | null;
     cardBrand: string | null;
     cardLastFour: string | null;
   } | null;
+  billingMode: "manual" | "lemonsqueezy";
+  isManualSubscription: boolean;
+  manualPayment: ManualPaymentDetails | null;
   usage: {
     leads: { used: number; limit: number };
     aiMessages: { used: number; limit: number };
@@ -40,6 +50,17 @@ export interface ApiBillingOverview {
     teamMembers: { used: number; limit: number };
   };
 }
+
+export type StartCheckoutResult =
+  | { mode: "lemonsqueezy"; checkoutUrl: string }
+  | {
+      mode: "manual";
+      plan: { id: string; name: string; priceLabel: string; pricePKR: number };
+      whatsappUrl: string | null;
+      bank: { accountTitle: string; accountNumber: string; bankName: string } | null;
+      easypaisaNumber: string | null;
+      jazzcashNumber: string | null;
+    };
 
 export interface ApiInvoice {
   id: string;
@@ -58,6 +79,12 @@ const invoiceStatusMap: Record<ApiInvoice["status"], InvoiceStatus> = {
   REFUNDED: "Refunded",
 };
 
+function formatAmount(amountCents: number, currency: string): string {
+  const amount = amountCents / 100;
+  if (currency === "PKR") return `Rs ${amount.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+}
+
 export function mapUsage(overview: ApiBillingOverview): UsageMetric[] {
   return [
     { label: "Leads captured", used: overview.usage.leads.used, limit: overview.usage.leads.limit, unit: "/mo" },
@@ -71,7 +98,7 @@ export function mapInvoice(inv: ApiInvoice): Invoice {
   return {
     id: inv.id,
     date: new Date(inv.issuedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-    amount: `$${(inv.amountCents / 100).toFixed(2)}`,
+    amount: formatAmount(inv.amountCents, inv.currency),
     status: invoiceStatusMap[inv.status],
     description: inv.billingReason ?? "Subscription charge",
     invoiceUrl: inv.invoiceUrl,

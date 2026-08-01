@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard, Download, Sparkles, ArrowUpRight, Loader2 } from "lucide-react";
+import { CreditCard, Download, Sparkles, ArrowUpRight, Loader2, MessageCircle, Landmark, Smartphone } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Modal } from "@/components/ui/modal";
 import { UsageMeter } from "@/components/billing/usage-meter";
 import {
   ApiBillingOverview,
   ApiInvoice,
   Invoice,
+  StartCheckoutResult,
   mapInvoice,
   mapUsage,
   invoiceStatusVariant,
@@ -26,6 +28,7 @@ export default function BillingPage() {
   const [upgrading, setUpgrading] = useState(false);
   const [openingPortal, setOpeningPortal] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [manualCheckout, setManualCheckout] = useState<Extract<StartCheckoutResult, { mode: "manual" }> | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -50,8 +53,12 @@ export default function BillingPage() {
     setUpgrading(true);
     setNotice(null);
     try {
-      const { checkoutUrl } = await api.post<{ checkoutUrl: string }>("/billing/checkout", { planId: nextPlanId });
-      window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+      const result = await api.post<StartCheckoutResult>("/billing/checkout", { planId: nextPlanId });
+      if (result.mode === "manual") {
+        setManualCheckout(result);
+      } else {
+        window.open(result.checkoutUrl, "_blank", "noopener,noreferrer");
+      }
     } catch (err) {
       setNotice(err instanceof ApiError ? err.message : "Couldn't start checkout.");
     } finally {
@@ -114,6 +121,9 @@ export default function BillingPage() {
                           year: "numeric",
                         })}`}
                     </CardDescription>
+                    {overview?.plan.pitchLine && (
+                      <p className="mt-0.5 text-[11.5px] text-text-muted">{overview.plan.pitchLine}</p>
+                    )}
                   </div>
                   <Button variant="outline" size="sm" onClick={handleUpgrade} loading={upgrading}>
                     <ArrowUpRight className="h-3.5 w-3.5" /> Upgrade plan
@@ -130,31 +140,49 @@ export default function BillingPage() {
                 <CardHeader>
                   <div>
                     <CardTitle>Payment method</CardTitle>
-                    <CardDescription>Default card on file</CardDescription>
+                    <CardDescription>
+                      {overview?.billingMode === "manual" ? "Bank transfer, JazzCash, or Easypaisa" : "Default card on file"}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-3 rounded-control border border-border p-3.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-white/[0.05]">
-                      <CreditCard className="h-4 w-4 text-text-secondary" />
+                  {overview?.billingMode === "manual" ? (
+                    <div className="flex items-center gap-3 rounded-control border border-border p-3.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-white/[0.05]">
+                        <MessageCircle className="h-4 w-4 text-text-secondary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-medium text-text-primary">
+                          {overview.subscription?.status === "ACTIVE" ? "Confirmed via WhatsApp" : "Message us to pay"}
+                        </p>
+                        <p className="text-[11.5px] text-text-muted">No card needed — pay how you already pay everyone else</p>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-medium text-text-primary">
-                        {overview?.subscription?.cardBrand
-                          ? `${overview.subscription.cardBrand} •••• ${overview.subscription.cardLastFour ?? "----"}`
-                          : "No card on file"}
-                      </p>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-control border border-border p-3.5">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-white/[0.05]">
+                        <CreditCard className="h-4 w-4 text-text-secondary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-medium text-text-primary">
+                          {overview?.subscription?.cardBrand
+                            ? `${overview.subscription.cardBrand} •••• ${overview.subscription.cardLastFour ?? "----"}`
+                            : "No card on file"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="mt-3 w-full"
-                    onClick={handleUpdatePaymentMethod}
-                    loading={openingPortal}
-                  >
-                    Update payment method
-                  </Button>
+                  )}
+                  {overview?.billingMode !== "manual" && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={handleUpdatePaymentMethod}
+                      loading={openingPortal}
+                    >
+                      Update payment method
+                    </Button>
+                  )}
 
                   {nextPlanId !== overview?.plan.id && (
                     <button
@@ -230,6 +258,73 @@ export default function BillingPage() {
           </>
         )}
       </main>
+
+      <Modal
+        open={!!manualCheckout}
+        onClose={() => setManualCheckout(null)}
+        title={`Subscribe to ${manualCheckout?.plan.name ?? ""}`}
+        description={manualCheckout ? `${manualCheckout.plan.priceLabel} — pay however's easiest, then message us to activate` : undefined}
+      >
+        {manualCheckout && (
+          <div className="space-y-3">
+            {manualCheckout.whatsappUrl && (
+              <a
+                href={manualCheckout.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-control border border-success/30 bg-success-muted p-3.5 transition-colors duration-200 hover:border-success/50"
+              >
+                <MessageCircle className="h-5 w-5 shrink-0 text-success" />
+                <div>
+                  <p className="text-[13px] font-medium text-text-primary">Message us on WhatsApp</p>
+                  <p className="text-[11.5px] text-text-secondary">Fastest way — we'll confirm and activate your plan same-day</p>
+                </div>
+              </a>
+            )}
+
+            {manualCheckout.bank && (
+              <div className="flex items-start gap-3 rounded-control border border-border p-3.5">
+                <Landmark className="mt-0.5 h-5 w-5 shrink-0 text-text-secondary" />
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-text-primary">Bank transfer</p>
+                  <p className="text-[12px] text-text-secondary">{manualCheckout.bank.bankName}</p>
+                  <p className="text-[12px] text-text-secondary">{manualCheckout.bank.accountTitle}</p>
+                  <p className="font-mono text-[12px] text-text-primary">{manualCheckout.bank.accountNumber}</p>
+                </div>
+              </div>
+            )}
+
+            {(manualCheckout.easypaisaNumber || manualCheckout.jazzcashNumber) && (
+              <div className="flex items-start gap-3 rounded-control border border-border p-3.5">
+                <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-text-secondary" />
+                <div className="min-w-0 space-y-1">
+                  <p className="text-[13px] font-medium text-text-primary">Mobile wallet</p>
+                  {manualCheckout.easypaisaNumber && (
+                    <p className="text-[12px] text-text-secondary">
+                      Easypaisa: <span className="font-mono text-text-primary">{manualCheckout.easypaisaNumber}</span>
+                    </p>
+                  )}
+                  {manualCheckout.jazzcashNumber && (
+                    <p className="text-[12px] text-text-secondary">
+                      JazzCash: <span className="font-mono text-text-primary">{manualCheckout.jazzcashNumber}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!manualCheckout.whatsappUrl && !manualCheckout.bank && !manualCheckout.easypaisaNumber && !manualCheckout.jazzcashNumber && (
+              <p className="text-[12.5px] text-text-secondary">
+                Payment details haven't been configured yet — contact support to subscribe.
+              </p>
+            )}
+
+            <p className="text-[11.5px] text-text-muted">
+              Your plan activates as soon as we confirm the payment — usually within a few hours.
+            </p>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }
