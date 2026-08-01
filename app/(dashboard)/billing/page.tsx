@@ -263,7 +263,7 @@ export default function BillingPage() {
         open={!!manualCheckout}
         onClose={() => setManualCheckout(null)}
         title={`Subscribe to ${manualCheckout?.plan.name ?? ""}`}
-        description={manualCheckout ? `${manualCheckout.plan.priceLabel} — pay however's easiest, then message us to activate` : undefined}
+        description={manualCheckout ? `${manualCheckout.plan.priceLabel} — pricing is tailored per business, let's talk` : undefined}
       >
         {manualCheckout && (
           <div className="space-y-3">
@@ -277,7 +277,7 @@ export default function BillingPage() {
                 <MessageCircle className="h-5 w-5 shrink-0 text-success" />
                 <div>
                   <p className="text-[13px] font-medium text-text-primary">Message us on WhatsApp</p>
-                  <p className="text-[11.5px] text-text-secondary">Fastest way — we'll confirm and activate your plan same-day</p>
+                  <p className="text-[11.5px] text-text-secondary">We'll agree on a price that fits your business, then activate same-day</p>
                 </div>
               </a>
             )}
