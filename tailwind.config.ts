@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: "class",
@@ -11,32 +12,33 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       colors: {
-        // Warm graphite instrument panel — not pure black, slight warmth
-        background: "#0F0F12",
-        surface: "#17181C",
-        card: "#1C1D22",
+        // Values come from CSS variables (see globals.css) so the whole
+        // palette can flip between the .dark and .light themes at runtime.
+        background: "var(--color-background)",
+        surface: "var(--color-surface)",
+        card: "var(--color-card)",
         border: {
-          DEFAULT: "rgba(255,255,255,0.07)",
-          strong: "rgba(255,255,255,0.14)",
+          DEFAULT: "var(--color-border)",
+          strong: "var(--color-border-strong)",
         },
         // Brass / orbit-ring gold — the one accent this product spends its boldness on
         primary: {
-          DEFAULT: "#C79A44",
-          hover: "#AF8636",
-          muted: "rgba(199,154,68,0.14)",
+          DEFAULT: "var(--color-primary)",
+          hover: "var(--color-primary-hover)",
+          muted: "var(--color-primary-muted)",
         },
         // Muted slate-teal — quiet supporting color, never competes with primary
         secondary: {
-          DEFAULT: "#4C7C79",
-          muted: "rgba(76,124,121,0.16)",
+          DEFAULT: "var(--color-secondary)",
+          muted: "var(--color-secondary-muted)",
         },
-        success: { DEFAULT: "#6FA37E", muted: "rgba(111,163,126,0.14)" },
-        warning: { DEFAULT: "#C9793B", muted: "rgba(201,121,59,0.14)" },
-        danger: { DEFAULT: "#B7503E", muted: "rgba(183,80,62,0.14)" },
+        success: { DEFAULT: "var(--color-success)", muted: "var(--color-success-muted)" },
+        warning: { DEFAULT: "var(--color-warning)", muted: "var(--color-warning-muted)" },
+        danger: { DEFAULT: "var(--color-danger)", muted: "var(--color-danger-muted)" },
         text: {
-          primary: "#EEEDE6",
-          secondary: "#A2A099",
-          muted: "#6C6A63",
+          primary: "var(--color-text-primary)",
+          secondary: "var(--color-text-secondary)",
+          muted: "var(--color-text-muted)",
         },
       },
       borderRadius: {
@@ -78,7 +80,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 };
 
 export default config;
