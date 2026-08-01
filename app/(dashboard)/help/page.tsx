@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -422,10 +423,15 @@ export default function HelpPage() {
               </Section>
 
               <Section id="billing" title="Billing">
+                <p className="text-[13px] leading-relaxed text-text-secondary">
+                  Billing runs in <strong className="text-text-primary">manual mode</strong> by default — there&apos;s
+                  no card checkout. Every customer pays by WhatsApp / bank transfer / JazzCash / Easypaisa, and
+                  whoever manages the deployment activates their plan by hand.
+                </p>
                 <BtnList
                   items={[
-                    { name: "Upgrade plan", does: "Opens a secure Lemon Squeezy checkout page in a new tab for the next plan tier up." },
-                    { name: "Update payment method", does: "Opens the billing portal in a new tab, where you can change your card on file." },
+                    { name: "Upgrade plan", does: "Opens a modal with a WhatsApp button (pre-filled with the plan you're interested in) plus bank/JazzCash/Easypaisa details — not a checkout redirect. Sends nothing automatically." },
+                    { name: "Update payment method", does: "Only shown when billing is in automated (Lemon Squeezy) mode. Hidden in manual mode, since there's no card on file to update." },
                     { name: "Download icon (per invoice row)", does: "Opens that invoice's PDF in a new tab. Greyed out if no invoice file is available yet for that entry." },
                   ]}
                 />
@@ -433,6 +439,16 @@ export default function HelpPage() {
                   The usage meters (leads, AI messages, workflow runs, etc.) show how much of your current
                   plan&apos;s monthly allowance you&apos;ve used — read-only.
                 </p>
+                <Link
+                  href="/help/billing"
+                  className="flex items-center justify-between rounded-control border border-primary/25 bg-primary-muted/40 px-3.5 py-3 text-[13px] text-text-primary transition-colors duration-200 hover:bg-primary-muted"
+                >
+                  <span>
+                    <strong className="text-primary">Managing this deployment?</strong> Full Billing &amp; Payment
+                    Guide — how to activate a customer, pricing, and setup.
+                  </span>
+                  <span className="text-primary">→</span>
+                </Link>
               </Section>
 
               <Section id="settings" title="Settings">

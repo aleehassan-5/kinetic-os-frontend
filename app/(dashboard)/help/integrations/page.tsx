@@ -27,7 +27,7 @@ const toc: TocItem[] = [
   { id: "crm", label: "HubSpot & Google Sheets" },
   { id: "social-publishing", label: "Social Publishing" },
   { id: "elevenlabs", label: "ElevenLabs Voiceover" },
-  { id: "billing", label: "Lemon Squeezy (Billing)" },
+  { id: "billing", label: "Billing (manual by default)" },
   { id: "sentry", label: "Sentry (Monitoring)" },
   { id: "faq", label: "FAQ" },
 ];
@@ -465,7 +465,40 @@ export default function IntegrationsGuidePage() {
                 </p>
               </Section>
 
-              <Section id="billing" title="Lemon Squeezy (Billing)">
+              <Section id="billing" title="Billing (manual by default)">
+                <p className="text-[13px] leading-relaxed text-text-secondary">
+                  Kinetic OS bills manually out of the box — customers pay by WhatsApp / bank transfer /
+                  JazzCash / Easypaisa, and you activate their plan by hand. There&apos;s no account to create
+                  or key to fetch for this to work; it just needs your own payment details in the .env below.
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    "FOUNDER_WHATSAPP_NUMBER",
+                    "BANK_ACCOUNT_TITLE",
+                    "BANK_ACCOUNT_NUMBER",
+                    "BANK_NAME",
+                    "EASYPAISA_NUMBER",
+                    "JAZZCASH_NUMBER",
+                    "BILLING_ADMIN_SECRET",
+                  ].map((v) => (
+                    <code key={v} className="rounded bg-black/20 px-1.5 py-0.5 text-[11.5px] text-primary">{v}</code>
+                  ))}
+                </div>
+                <Link
+                  href="/help/billing"
+                  className="flex items-center justify-between rounded-control border border-primary/25 bg-primary-muted/40 px-3.5 py-3 text-[13px] text-text-primary transition-colors duration-200 hover:bg-primary-muted"
+                >
+                  <span>
+                    <strong className="text-primary">Full walkthrough</strong> — how to activate a customer,
+                    how pricing works, and how this all fits together.
+                  </span>
+                  <span className="text-primary">→</span>
+                </Link>
+
+                <p className="mt-2 text-[13px] leading-relaxed text-text-secondary">
+                  Automated card checkout is available when you&apos;re ready for it — set{" "}
+                  <code className="rounded bg-black/20 px-1 py-0.5 text-primary">BILLING_MODE=lemonsqueezy</code>:
+                </p>
                 <Provider
                   name="Lemon Squeezy"
                   who="deployment"
@@ -478,6 +511,7 @@ export default function IntegrationsGuidePage() {
                     "Settings → Webhooks → Create webhook pointing at https://your-api-domain/webhooks/lemonsqueezy, subscribed to subscription events, and copy the signing secret shown there.",
                   ]}
                   envVars={[
+                    "BILLING_MODE=lemonsqueezy",
                     "LEMONSQUEEZY_API_KEY",
                     "LEMONSQUEEZY_STORE_ID",
                     "LEMONSQUEEZY_WEBHOOK_SECRET",
@@ -487,6 +521,11 @@ export default function IntegrationsGuidePage() {
                   ]}
                   free="Free to set up — Lemon Squeezy takes a percentage per transaction instead of a monthly fee."
                 />
+                <Note>
+                  Lemon Squeezy checkout only accepts card and PayPal — and PayPal doesn&apos;t support
+                  individual accounts in Pakistan. Confirm your customer base actually has international cards
+                  before relying on this as the only payment option.
+                </Note>
               </Section>
 
               <Section id="sentry" title="Sentry (error monitoring)">

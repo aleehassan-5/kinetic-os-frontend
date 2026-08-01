@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CreditCard, Download, Sparkles, ArrowUpRight, Loader2, MessageCircle, Landmark, Smartphone } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -88,6 +89,17 @@ export default function BillingPage() {
       <Topnav title="Billing" subtitle="Plan, usage, and payment history" />
 
       <main className="space-y-6 p-6 lg:p-8">
+        <Link
+          href="/help/billing"
+          className="flex items-center justify-between rounded-control border border-primary/25 bg-primary-muted/40 px-3.5 py-3 text-[13px] text-text-primary transition-colors duration-200 hover:bg-primary-muted"
+        >
+          <span>
+            <strong className="text-primary">How does paying work?</strong> Full Billing &amp; Payment Guide —
+            what happens after you click Upgrade.
+          </span>
+          <span className="text-primary">→</span>
+        </Link>
+
         {notice && (
           <div className="rounded-control border border-border bg-white/[0.03] px-4 py-2.5 text-[13px] text-text-secondary">
             {notice}
