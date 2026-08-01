@@ -44,6 +44,17 @@ export function PostComposer({ onClose, onCreated }: { onClose: () => void; onCr
       setError("LinkedIn video posting isn't supported yet — pick Static Graphic, or choose a different platform.");
       return;
     }
+    let scheduledAtIso: string | undefined;
+    if (date && time) {
+      const parsed = new Date(`${date}T${time}:00`);
+      if (!Number.isNaN(parsed.getTime())) {
+        scheduledAtIso = parsed.toISOString();
+      }
+    }
+    if (!scheduledAtIso && mode === "generate_and_schedule") {
+      setError("Pick a valid publish date and time first.");
+      return;
+    }
     setError(null);
     setSubmitting(mode === "draft" ? "draft" : "generate");
     try {
@@ -53,7 +64,7 @@ export function PostComposer({ onClose, onCreated }: { onClose: () => void; onCr
         contentType: contentTypeToApi[contentType],
         prompt: prompt || undefined,
         useVoiceover: isVideo ? useVoiceover : false,
-        scheduledAt: new Date(`${date}T${time}:00`).toISOString(),
+        scheduledAt: scheduledAtIso,
         mode,
       });
       onCreated();
