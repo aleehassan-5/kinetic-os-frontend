@@ -289,7 +289,7 @@ export default function BillingPage() {
                 <MessageCircle className="h-5 w-5 shrink-0 text-success" />
                 <div>
                   <p className="text-[13px] font-medium text-text-primary">Message us on WhatsApp</p>
-                  <p className="text-[11.5px] text-text-secondary">We'll agree on a price that fits your business, then activate same-day</p>
+                  <p className="text-[11.5px] text-text-secondary">We&apos;ll agree on a price that fits your business, then activate same-day</p>
                 </div>
               </a>
             )}
@@ -327,7 +327,7 @@ export default function BillingPage() {
 
             {!manualCheckout.whatsappUrl && !manualCheckout.bank && !manualCheckout.easypaisaNumber && !manualCheckout.jazzcashNumber && (
               <p className="text-[12.5px] text-text-secondary">
-                Payment details haven't been configured yet — contact support to subscribe.
+                Payment details haven&apos;t been configured yet — contact support to subscribe.
               </p>
             )}
 
