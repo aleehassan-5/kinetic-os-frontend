@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CreditCard, Download, Sparkles, ArrowUpRight, Loader2, MessageCircle, Landmark, Smartphone } from "lucide-react";
+import { CreditCard, Download, ArrowUpRight, Loader2, MessageCircle, Landmark, Smartphone } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,6 @@ export default function BillingPage() {
   }
 
   const usageMetrics = overview ? mapUsage(overview) : [];
-  const nextPlanId = overview ? NEXT_PLAN[overview.plan.id] ?? "scale" : "scale";
 
   return (
     <>
@@ -195,22 +194,6 @@ export default function BillingPage() {
                       Update payment method
                     </Button>
                   )}
-
-                  {nextPlanId !== overview?.plan.id && (
-                    <button
-                      onClick={handleUpgrade}
-                      className="mt-5 block w-full rounded-control border border-border bg-primary-muted/30 p-3.5 text-left transition-colors duration-200 hover:border-primary/40"
-                    >
-                      <div className="flex items-center gap-1.5 text-[12.5px] font-medium text-primary">
-                        <Sparkles className="h-3.5 w-3.5" /> {nextPlanId === "scale" ? "Scale" : "Growth"} plan
-                      </div>
-                      <p className="mt-1 text-[11.5px] text-text-secondary">
-                        {nextPlanId === "scale"
-                          ? "Unlimited AI conversations, more content generations/mo, and priority support."
-                          : "More leads, AI messages, and workflow runs per month."}
-                      </p>
-                    </button>
-                  )}
                 </CardContent>
               </Card>
             </div>
@@ -274,8 +257,8 @@ export default function BillingPage() {
       <Modal
         open={!!manualCheckout}
         onClose={() => setManualCheckout(null)}
-        title={`Subscribe to ${manualCheckout?.plan.name ?? ""}`}
-        description={manualCheckout ? `${manualCheckout.plan.priceLabel} — pricing is tailored per business, let's talk` : undefined}
+        title="Let's set you up"
+        description="Pricing is tailored to your business — no fixed plans, just a quick chat to agree on a number."
       >
         {manualCheckout && (
           <div className="space-y-3">

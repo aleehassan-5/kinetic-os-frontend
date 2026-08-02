@@ -184,30 +184,19 @@ export default function BillingGuidePage() {
 
               <Section id="pricing" title="How pricing works">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  There&apos;s no fixed price list customers pay off of. Starter / Growth / Scale are{" "}
-                  <strong className="text-text-primary">feature tiers</strong> (they set the leads/AI
-                  messages/workflow runs/team seats limits) — the number you actually charge is whatever you and
-                  that customer agree on, sent as <code className="rounded bg-black/20 px-1 py-0.5 text-primary">amountPKR</code> when
-                  you activate them. Leave it out and it falls back to that plan&apos;s reference price.
+                  <strong className="text-text-primary">There is no price list.</strong> You decide the number
+                  for each customer, one conversation at a time — whatever you agree on with them is exactly
+                  what gets charged. Nothing in the app suggests a price to the customer, and nothing forces you
+                  to charge the same amount twice.
                 </p>
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  The reference prices exist to anchor the WhatsApp conversation against what this replaces —
-                  hiring an intake staffer (~PKR 60,000/mo) or an agency retainer (~PKR 120,000/mo):
+                  Starter / Growth / Scale still exist behind the scenes purely as{" "}
+                  <strong className="text-text-primary">feature tiers</strong> — they control how many
+                  leads/AI messages/workflow runs/team seats a workspace gets, nothing about price. When you
+                  activate a customer (see the next section), you pick whichever tier matches what you sold
+                  them and type in the exact amount they&apos;re paying — that amount is what shows on their
+                  invoice, full stop.
                 </p>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-control border border-border bg-white/[0.02] p-3.5">
-                    <p className="text-[13px] font-semibold text-text-primary">Starter</p>
-                    <p className="text-[12.5px] text-text-muted">From PKR 9,900/mo</p>
-                  </div>
-                  <div className="rounded-control border border-border bg-white/[0.02] p-3.5">
-                    <p className="text-[13px] font-semibold text-text-primary">Growth</p>
-                    <p className="text-[12.5px] text-text-muted">From PKR 24,900/mo</p>
-                  </div>
-                  <div className="rounded-control border border-border bg-white/[0.02] p-3.5">
-                    <p className="text-[13px] font-semibold text-text-primary">Scale</p>
-                    <p className="text-[12.5px] text-text-muted">From PKR 54,900/mo</p>
-                  </div>
-                </div>
               </Section>
 
               <Section id="setup" title="One-time setup">
