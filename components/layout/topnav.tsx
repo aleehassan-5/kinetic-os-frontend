@@ -2,11 +2,12 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell, Plus, Menu } from "lucide-react";
+import { Search, Bell, Plus, Menu, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMobileNav } from "./mobile-nav-context";
 import { NotificationsPanel } from "@/components/notifications/notifications-panel";
 import { api } from "@/lib/api-client";
+import { useTheme } from "@/lib/theme-context";
 
 export function Topnav({
   title,
@@ -20,6 +21,7 @@ export function Topnav({
 }) {
   const router = useRouter();
   const { toggle } = useMobileNav();
+  const { theme, toggleTheme } = useTheme();
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [unreadCount, setUnreadCount] = React.useState(0);
 
@@ -54,6 +56,15 @@ export function Topnav({
             className="h-9 w-72 rounded-control border border-border bg-white/[0.03] pl-9 pr-3 text-[13px] text-text-primary placeholder:text-text-muted transition-colors duration-200 focus:border-primary focus:outline-none"
           />
         </div>
+
+        <button
+          onClick={toggleTheme}
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Light mode" : "Dark mode"}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-border text-text-secondary transition-colors duration-200 hover:border-border-strong hover:text-text-primary"
+        >
+          {theme === "dark" ? <Sun className="h-[17px] w-[17px]" /> : <Moon className="h-[17px] w-[17px]" />}
+        </button>
 
         <div className="relative">
           <button

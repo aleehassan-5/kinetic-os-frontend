@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronsUpDown, LogOut, Sun, Moon } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { nav } from "./nav-data";
 import { useAuth } from "@/lib/auth-context";
-import { useTheme } from "@/lib/theme-context";
 import { useNewLeadsCount } from "@/lib/use-new-leads-count";
 import { useRouteProgress } from "./route-progress";
 import { Logo } from "@/components/ui/logo";
@@ -20,7 +19,6 @@ function initials(name: string) {
 export function Sidebar() {
   const pathname = usePathname();
   const { user, workspace, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const newLeadsCount = useNewLeadsCount();
   const { start } = useRouteProgress();
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -83,13 +81,6 @@ export function Sidebar() {
       <div className="relative border-t border-border p-3">
         {menuOpen && (
           <div className="absolute bottom-[calc(100%+4px)] left-3 right-3 overflow-hidden rounded-control border border-border bg-card shadow-lg">
-            <button
-              onClick={toggleTheme}
-              className="flex w-full items-center gap-2 border-b border-border px-3 py-2.5 text-left text-[13px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.04] hover:text-text-primary"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              {theme === "dark" ? "Light mode" : "Dark mode"}
-            </button>
             <button
               onClick={logout}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-danger transition-colors duration-200 hover:bg-danger-muted"
