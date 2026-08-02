@@ -64,7 +64,7 @@ function Step({ n, children }: { n: number; children: React.ReactNode }) {
       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-muted text-[12px] font-semibold text-primary">
         {n}
       </span>
-      <p className="text-[13px] leading-relaxed text-text-secondary">{children}</p>
+      <div className="text-[13px] leading-relaxed text-text-secondary">{children}</div>
     </div>
   );
 }
