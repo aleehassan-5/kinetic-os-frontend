@@ -422,16 +422,9 @@ export default function HelpPage() {
               </Section>
 
               <Section id="billing" title="Billing">
-                <BtnList
-                  items={[
-                    { name: "Upgrade plan", does: "Opens a secure Lemon Squeezy checkout page in a new tab for the next plan tier up." },
-                    { name: "Update payment method", does: "Opens the billing portal in a new tab, where you can change your card on file." },
-                    { name: "Download icon (per invoice row)", does: "Opens that invoice's PDF in a new tab. Greyed out if no invoice file is available yet for that entry." },
-                  ]}
-                />
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  The usage meters (leads, AI messages, workflow runs, etc.) show how much of your current
-                  plan&apos;s monthly allowance you&apos;ve used — read-only.
+                  Full walkthrough — including how billing is set up behind the scenes — now lives in its own
+                  guide: <a href="/help/billing" className="text-primary hover:underline">Billing User Guide</a>.
                 </p>
               </Section>
 

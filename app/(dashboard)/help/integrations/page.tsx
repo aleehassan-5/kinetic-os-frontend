@@ -466,27 +466,10 @@ export default function IntegrationsGuidePage() {
               </Section>
 
               <Section id="billing" title="Lemon Squeezy (Billing)">
-                <Provider
-                  name="Lemon Squeezy"
-                  who="deployment"
-                  where="lemonsqueezy.com"
-                  steps={[
-                    "Create a store at lemonsqueezy.com and complete their account verification (needed before you can accept real payments).",
-                    "Settings → API → Create API key.",
-                    "Your Store ID is shown right on that same Settings → API page.",
-                    "Create one product per plan tier (Starter / Growth / Scale) — each product's default variant ID is on its product page under Variants.",
-                    "Settings → Webhooks → Create webhook pointing at https://your-api-domain/webhooks/lemonsqueezy, subscribed to subscription events, and copy the signing secret shown there.",
-                  ]}
-                  envVars={[
-                    "LEMONSQUEEZY_API_KEY",
-                    "LEMONSQUEEZY_STORE_ID",
-                    "LEMONSQUEEZY_WEBHOOK_SECRET",
-                    "LEMONSQUEEZY_VARIANT_STARTER",
-                    "LEMONSQUEEZY_VARIANT_GROWTH",
-                    "LEMONSQUEEZY_VARIANT_SCALE",
-                  ]}
-                  free="Free to set up — Lemon Squeezy takes a percentage per transaction instead of a monthly fee."
-                />
+                <p className="text-[13px] leading-relaxed text-text-secondary">
+                  Full setup steps and how to use the Billing page day-to-day now live together in their own
+                  guide: <Link href="/help/billing" className="text-primary hover:underline">Billing User Guide</Link>.
+                </p>
               </Section>
 
               <Section id="sentry" title="Sentry (error monitoring)">
