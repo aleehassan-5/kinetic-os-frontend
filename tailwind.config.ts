@@ -14,31 +14,33 @@ const config: Config = {
       colors: {
         // Values come from CSS variables (see globals.css) so the whole
         // palette can flip between the .dark and .light themes at runtime.
-        background: "var(--color-background)",
-        surface: "var(--color-surface)",
-        card: "var(--color-card)",
+        // Channel-based vars (rgb(var(--x) / <alpha-value>)) let Tailwind's
+        // opacity modifiers (e.g. bg-primary/40) keep working with them.
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        card: "rgb(var(--color-card) / <alpha-value>)",
         border: {
           DEFAULT: "var(--color-border)",
           strong: "var(--color-border-strong)",
         },
         // Brass / orbit-ring gold — the one accent this product spends its boldness on
         primary: {
-          DEFAULT: "var(--color-primary)",
-          hover: "var(--color-primary-hover)",
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
+          hover: "rgb(var(--color-primary-hover) / <alpha-value>)",
           muted: "var(--color-primary-muted)",
         },
         // Muted slate-teal — quiet supporting color, never competes with primary
         secondary: {
-          DEFAULT: "var(--color-secondary)",
+          DEFAULT: "rgb(var(--color-secondary) / <alpha-value>)",
           muted: "var(--color-secondary-muted)",
         },
-        success: { DEFAULT: "var(--color-success)", muted: "var(--color-success-muted)" },
-        warning: { DEFAULT: "var(--color-warning)", muted: "var(--color-warning-muted)" },
-        danger: { DEFAULT: "var(--color-danger)", muted: "var(--color-danger-muted)" },
+        success: { DEFAULT: "rgb(var(--color-success) / <alpha-value>)", muted: "var(--color-success-muted)" },
+        warning: { DEFAULT: "rgb(var(--color-warning) / <alpha-value>)", muted: "var(--color-warning-muted)" },
+        danger: { DEFAULT: "rgb(var(--color-danger) / <alpha-value>)", muted: "var(--color-danger-muted)" },
         text: {
-          primary: "var(--color-text-primary)",
-          secondary: "var(--color-text-secondary)",
-          muted: "var(--color-text-muted)",
+          primary: "rgb(var(--color-text-primary) / <alpha-value>)",
+          secondary: "rgb(var(--color-text-secondary) / <alpha-value>)",
+          muted: "rgb(var(--color-text-muted) / <alpha-value>)",
         },
       },
       borderRadius: {
