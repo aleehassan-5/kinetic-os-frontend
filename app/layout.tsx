@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
@@ -16,6 +16,15 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mon
 export const metadata: Metadata = {
   title: "Kinetic OS — Isolated Workspace Automation",
   description: "The Isolated Workspace that runs your business's front line — every inquiry answered, every customer tracked, hours reclaimed every month.",
+};
+
+// This was missing entirely. Without it, some browsers fall back to a wide
+// default layout viewport (the classic ~980px "desktop site" assumption)
+// and shrink everything to fit the actual window — which reads as the
+// whole page being zoomed out even on a normal-sized desktop browser.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

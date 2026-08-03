@@ -57,39 +57,59 @@ export function WorkflowCanvas({
   const height = 540;
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
+  const userAdjustedRef = useRef(false);
 
-  function fitToScreen() {
-    const wrapperWidth = wrapperRef.current?.clientWidth ?? width;
+  function fitToScreen(el?: HTMLDivElement | null) {
+    const wrapperWidth = (el ?? wrapperRef.current)?.clientWidth;
+    if (!wrapperWidth) return; // don't compute off a not-yet-laid-out (0px) container
     // Leave a little breathing room instead of an edge-to-edge fit.
     const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, (wrapperWidth - 24) / width));
     setZoom(Number(next.toFixed(2)));
   }
 
-  // Auto-fit once on mount so every node is visible without an extra click,
-  // then leave it under manual control (zoom buttons / reset to 100%).
+  // Auto-fit on mount, and keep re-fitting whenever the wrapper's actual
+  // rendered size changes (sidebar toggling, window resize, or the grid
+  // layout settling a beat after this first paints) — a single mount-time
+  // measurement can catch a transient narrower width and then get stuck
+  // there forever with no way to recover except the manual zoom buttons.
   useEffect(() => {
-    fitToScreen();
+    const el = wrapperRef.current;
+    if (!el) return;
+
+    fitToScreen(el);
+
+    const observer = new ResizeObserver(() => {
+      if (!userAdjustedRef.current) fitToScreen(el);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function adjustZoom(next: number) {
+    userAdjustedRef.current = true;
+    setZoom(next);
+  }
 
   return (
     <div ref={wrapperRef} className="relative">
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-control border border-border bg-card/95 p-1 shadow-elevated backdrop-blur">
         <button
-          onClick={() => setZoom((z) => Math.max(MIN_ZOOM, Number((z - 0.1).toFixed(2))))}
+          onClick={() => adjustZoom(Math.max(MIN_ZOOM, Number((zoom - 0.1).toFixed(2))))}
           className="flex h-7 w-7 items-center justify-center rounded-[6px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary"
           title="Zoom out"
         >
           <ZoomOut className="h-3.5 w-3.5" />
         </button>
         <button
-          onClick={() => setZoom(1)}
+          onClick={() => adjustZoom(1)}
           className="min-w-[42px] rounded-[6px] px-1.5 py-1 text-center text-[11.5px] font-medium text-text-secondary transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary"
           title="Reset to 100%"
         >
           {Math.round(zoom * 100)}%
         </button>
         <button
-          onClick={() => setZoom((z) => Math.min(MAX_ZOOM, Number((z + 0.1).toFixed(2))))}
+          onClick={() => adjustZoom(Math.min(MAX_ZOOM, Number((zoom + 0.1).toFixed(2))))}
           className="flex h-7 w-7 items-center justify-center rounded-[6px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary"
           title="Zoom in"
         >
@@ -97,7 +117,10 @@ export function WorkflowCanvas({
         </button>
         <div className="mx-0.5 h-4 w-px bg-border" />
         <button
-          onClick={fitToScreen}
+          onClick={() => {
+            userAdjustedRef.current = false;
+            fitToScreen();
+          }}
           className="flex h-7 w-7 items-center justify-center rounded-[6px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary"
           title="Fit to screen"
         >
