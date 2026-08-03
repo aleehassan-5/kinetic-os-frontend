@@ -151,35 +151,28 @@ export default function BillingGuidePage() {
               <Section id="founder-side" title="Activating a customer (you)">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
                   Once you&apos;ve agreed on a price with a customer and confirmed the transfer landed (bank
-                  statement, JazzCash/Easypaisa SMS, or just their word for the first few), activate their
-                  workspace:
+                  statement, JazzCash/Easypaisa SMS, or just their word for the first few), you flip their
+                  workspace to that plan using their workspace ID (visible in their Settings → Workspace) and
+                  the price you agreed on.
                 </p>
                 <Step n={1}>
                   Get their <strong className="text-text-primary">workspace ID</strong> — visible in Settings →
                   Workspace on their account, or ask them to send a screenshot.
                 </Step>
                 <Step n={2}>
-                  Send a request to <code className="rounded bg-black/20 px-1 py-0.5 text-primary">POST /billing/admin/activate</code>{" "}
-                  with header <code className="rounded bg-black/20 px-1 py-0.5 text-primary">x-billing-admin-secret</code> set
-                  to your <code className="rounded bg-black/20 px-1 py-0.5 text-primary">BILLING_ADMIN_SECRET</code>, and a
-                  body like:
-                  <pre className="mt-2 overflow-x-auto rounded-control border border-border bg-black/30 p-3 text-[12px] text-text-secondary">
-{`{
-  "workspaceId": "clxyz...",
-  "planId": "starter",
-  "amountPKR": 12000
-}`}
-                  </pre>
+                  Activate their plan for the exact amount you agreed on. This is a deployment-level action, not
+                  something inside the app — see the internal ops notes for whoever manages your Kinetic OS
+                  server for exactly how.
                 </Step>
                 <Step n={3}>
-                  That&apos;s it — their plan activates immediately, a real PAID invoice for that exact amount
-                  appears on their Billing page, and their usage limits update to the new plan&apos;s tier.
+                  Their plan activates immediately, a real PAID invoice for that exact amount appears on their
+                  Billing page, and their usage limits update to the new plan&apos;s tier.
                 </Step>
-                <Tip>
-                  Any REST client works for this — Postman, Insomnia, or even a simple <code className="rounded bg-black/20 px-1 py-0.5 text-primary">curl</code> command
-                  from your terminal. It only needs to be run once per customer per billing period, so it&apos;s
-                  fine that it&apos;s not a button in the app yet.
-                </Tip>
+                <Note>
+                  The activation step is deliberately not a button inside the app — it&apos;s protected
+                  separately so no logged-in customer can ever activate their own plan for free. Only whoever
+                  holds the deployment&apos;s admin credentials can do this.
+                </Note>
               </Section>
 
               <Section id="pricing" title="How pricing works">
@@ -193,44 +186,32 @@ export default function BillingGuidePage() {
                   Starter / Growth / Scale still exist behind the scenes purely as{" "}
                   <strong className="text-text-primary">feature tiers</strong> — they control how many
                   leads/AI messages/workflow runs/team seats a workspace gets, nothing about price. When you
-                  activate a customer (see the next section), you pick whichever tier matches what you sold
-                  them and type in the exact amount they&apos;re paying — that amount is what shows on their
+                  activate a customer (see the previous section), you pick whichever tier matches what you sold
+                  them and enter the exact amount they&apos;re paying — that amount is what shows on their
                   invoice, full stop.
                 </p>
               </Section>
 
               <Section id="setup" title="One-time setup">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  All optional — whatever you leave blank just doesn&apos;t show up in the customer&apos;s payment
-                  modal. Set these in your backend&apos;s <code className="rounded bg-black/20 px-1 py-0.5 text-primary">.env</code>:
+                  Before the payment modal shows anything useful, whoever manages your deployment needs to add
+                  your WhatsApp number and whichever payment details you actually want to offer — bank account,
+                  Easypaisa, and/or JazzCash. All optional independently; whatever isn&apos;t set just doesn&apos;t
+                  show up in the customer&apos;s payment modal.
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    "FOUNDER_WHATSAPP_NUMBER",
-                    "BANK_ACCOUNT_TITLE",
-                    "BANK_ACCOUNT_NUMBER",
-                    "BANK_NAME",
-                    "EASYPAISA_NUMBER",
-                    "JAZZCASH_NUMBER",
-                    "BILLING_ADMIN_SECRET",
-                  ].map((v) => (
-                    <code key={v} className="rounded bg-black/20 px-1.5 py-0.5 text-[11.5px] text-primary">{v}</code>
-                  ))}
-                </div>
                 <Note>
-                  <code className="rounded bg-black/10 px-1 py-0.5">BILLING_ADMIN_SECRET</code> isn&apos;t
-                  optional in practice — without it, the activation endpoint refuses every request. Pick a long
-                  random value and never share it with a customer; it&apos;s yours only.
+                  This is configured on the backend server, not inside this app — send your WhatsApp number and
+                  payment details to whoever set up your Kinetic OS deployment, the same way you would for any
+                  other account-level setting.
                 </Note>
               </Section>
 
               <Section id="switching" title="Switching to automated billing later">
                 <p className="text-[13px] leading-relaxed text-text-secondary">
-                  When there&apos;s enough volume that manually activating each customer stops making sense, set{" "}
-                  <code className="rounded bg-black/20 px-1 py-0.5 text-primary">BILLING_MODE=lemonsqueezy</code> in
-                  the backend&apos;s .env. The Lemon Squeezy integration was built alongside manual mode, not
-                  ripped out — &quot;Upgrade plan&quot; will redirect to a real card checkout instead of the
-                  WhatsApp modal, no other code changes needed.
+                  When there&apos;s enough volume that manually activating each customer stops making sense, ask
+                  whoever manages your deployment to switch on automated billing. The Lemon Squeezy integration
+                  was built alongside manual mode, not ripped out — &quot;Upgrade plan&quot; will redirect to a
+                  real card checkout instead of the WhatsApp modal, no other code changes needed.
                 </p>
                 <Note>
                   Lemon Squeezy checkout only accepts card and PayPal — and PayPal doesn&apos;t support individual
@@ -264,11 +245,10 @@ export default function BillingGuidePage() {
                   follow up for the next payment.
                 </Sub>
                 <Sub title="Is this secure enough for real money?">
-                  The activation endpoint is protected by a constant-time secret comparison and isn&apos;t
-                  reachable by any logged-in customer — only someone with your{" "}
-                  <code className="rounded bg-black/20 px-1 py-0.5">BILLING_ADMIN_SECRET</code> can activate a
-                  plan. No payment details ever pass through it; you&apos;re just confirming money you already
-                  received elsewhere.
+                  Activation is protected separately from the app itself, using a constant-time secret
+                  comparison, and isn&apos;t reachable by any logged-in customer — only whoever holds your
+                  deployment&apos;s admin credentials can activate a plan. No payment details ever pass through
+                  it; you&apos;re just confirming money you already received elsewhere.
                 </Sub>
               </Section>
 

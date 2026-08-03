@@ -46,14 +46,12 @@ function Provider({
   who,
   where,
   steps,
-  envVars,
   free,
 }: {
   name: string;
   who: "self-serve" | "deployment";
   where: string;
   steps: string[];
-  envVars?: string[];
   free?: string;
 }) {
   return (
@@ -72,15 +70,11 @@ function Provider({
           <li key={i}>{s}</li>
         ))}
       </ol>
-      {envVars && envVars.length > 0 && (
-        <div className="mt-3">
-          <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-text-muted">Backend .env variables</p>
-          <div className="flex flex-wrap gap-1.5">
-            {envVars.map((v) => (
-              <code key={v} className="rounded bg-black/20 px-1.5 py-0.5 text-[11.5px] text-primary">{v}</code>
-            ))}
-          </div>
-        </div>
+      {who === "deployment" && (
+        <p className="mt-3 text-[12px] text-text-muted">
+          Send whatever you get here to whoever manages your Kinetic OS deployment — it&apos;s configured on
+          the backend server, not inside this app.
+        </p>
       )}
       {free && <p className="mt-2.5 text-[12px] text-text-muted">{free}</p>}
     </div>
@@ -202,7 +196,6 @@ export default function IntegrationsGuidePage() {
                     "On the WhatsApp → API Setup screen, you'll see a test phone number already provisioned, with a Phone Number ID and a temporary access token right there on the page.",
                     "Copy the Phone Number ID and Access Token into Kinetic OS: Settings → Integrations → WhatsApp Business → Connect.",
                   ]}
-                  envVars={["WHATSAPP_PHONE_NUMBER_ID", "WHATSAPP_ACCESS_TOKEN"]}
                   free="Meta's test number works immediately for development. For a real business number that customers can message, you'll need to go through Meta's business verification — that part isn't instant, budget a few days."
                 />
                 <Note>
@@ -226,7 +219,6 @@ export default function IntegrationsGuidePage() {
                     "BotFather replies with a token that looks like 123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11 — copy that whole string.",
                     "Paste it into Kinetic OS: Settings → Integrations → Telegram → Connect.",
                   ]}
-                  envVars={["TELEGRAM_BOT_TOKEN"]}
                   free="Entirely free, no approval process — this is the fastest one to set up."
                 />
                 <p className="text-[13px] leading-relaxed text-text-secondary">
@@ -247,7 +239,6 @@ export default function IntegrationsGuidePage() {
                     "Still on Messenger → Settings, copy the Page ID, then click \"Generate Token\" next to that Page to get a Page Access Token.",
                     "Paste both into Kinetic OS: Settings → Integrations → Instagram DMs (or Messenger) → Connect.",
                   ]}
-                  envVars={["META_APP_ID", "META_APP_SECRET", "META_PAGE_ACCESS_TOKEN"]}
                   free="Free for development/testing with your own accounts. Messaging people who aren't added as testers on your app requires Meta's App Review — plan for that before a real launch."
                 />
               </Section>
@@ -292,7 +283,6 @@ export default function IntegrationsGuidePage() {
                     "Under \"Authorized redirect URIs\" add both: https://your-api-domain/auth/google/callback (login) and https://your-api-domain/integrations/google/callback (Calendar booking, if you'll use that too).",
                     "Copy the generated Client ID and Client Secret.",
                   ]}
-                  envVars={["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_LOGIN_REDIRECT_URI"]}
                   free="Free. Google will show an unverified-app warning to users until you submit the consent screen for verification, which is worth doing before a real launch."
                 />
               </Section>
@@ -469,21 +459,9 @@ export default function IntegrationsGuidePage() {
                 <p className="text-[13px] leading-relaxed text-text-secondary">
                   Kinetic OS bills manually out of the box — customers pay by WhatsApp / bank transfer /
                   JazzCash / Easypaisa, and you activate their plan by hand. There&apos;s no account to create
-                  or key to fetch for this to work; it just needs your own payment details in the .env below.
+                  or key to fetch for this to work; whoever manages your deployment just needs your WhatsApp
+                  number and whichever payment details you want to offer.
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    "FOUNDER_WHATSAPP_NUMBER",
-                    "BANK_ACCOUNT_TITLE",
-                    "BANK_ACCOUNT_NUMBER",
-                    "BANK_NAME",
-                    "EASYPAISA_NUMBER",
-                    "JAZZCASH_NUMBER",
-                    "BILLING_ADMIN_SECRET",
-                  ].map((v) => (
-                    <code key={v} className="rounded bg-black/20 px-1.5 py-0.5 text-[11.5px] text-primary">{v}</code>
-                  ))}
-                </div>
                 <Link
                   href="/help/billing"
                   className="flex items-center justify-between rounded-control border border-primary/25 bg-primary-muted/40 px-3.5 py-3 text-[13px] text-text-primary transition-colors duration-200 hover:bg-primary-muted"
@@ -510,15 +488,6 @@ export default function IntegrationsGuidePage() {
                     "Create one product per plan tier (Starter / Growth / Scale) — each product's default variant ID is on its product page under Variants.",
                     "Settings → Webhooks → Create webhook pointing at https://your-api-domain/webhooks/lemonsqueezy, subscribed to subscription events, and copy the signing secret shown there.",
                   ]}
-                  envVars={[
-                    "BILLING_MODE=lemonsqueezy",
-                    "LEMONSQUEEZY_API_KEY",
-                    "LEMONSQUEEZY_STORE_ID",
-                    "LEMONSQUEEZY_WEBHOOK_SECRET",
-                    "LEMONSQUEEZY_VARIANT_STARTER",
-                    "LEMONSQUEEZY_VARIANT_GROWTH",
-                    "LEMONSQUEEZY_VARIANT_SCALE",
-                  ]}
                   free="Free to set up — Lemon Squeezy takes a percentage per transaction instead of a monthly fee."
                 />
                 <Note>
@@ -538,7 +507,6 @@ export default function IntegrationsGuidePage() {
                     "Create a new project, framework: Node.js.",
                     "Settings → Client Keys (DSN) → copy the DSN shown there.",
                   ]}
-                  envVars={["SENTRY_DSN"]}
                   free="Free tier covers a generous volume of errors per month for a small business."
                 />
                 <p className="text-[13px] leading-relaxed text-text-secondary">
