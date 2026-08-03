@@ -71,10 +71,14 @@ export function DocumentTable({
   docs,
   onDelete,
   deletingId,
+  onResync,
+  resyncingId,
 }: {
   docs: KnowledgeDoc[];
   onDelete?: (id: string) => void;
   deletingId?: string | null;
+  onResync?: (id: string) => void;
+  resyncingId?: string | null;
 }) {
   if (docs.length === 0) {
     return (
@@ -129,8 +133,17 @@ export function DocumentTable({
                 <td className="px-3 py-3.5 text-[12.5px] text-text-muted">{doc.lastSynced}</td>
                 <td className="px-3 py-3.5">
                   <div className="flex items-center justify-end gap-1">
-                    <button className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary" title="Re-sync">
-                      <RotateCw className="h-3.5 w-3.5" />
+                    <button
+                      onClick={() => onResync?.(doc.id)}
+                      disabled={resyncingId === doc.id || doc.status === "Processing"}
+                      className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary disabled:opacity-40"
+                      title="Re-sync"
+                    >
+                      {resyncingId === doc.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RotateCw className="h-3.5 w-3.5" />
+                      )}
                     </button>
                     <button
                       onClick={() => onDelete?.(doc.id)}

@@ -75,6 +75,7 @@ export default function KnowledgeBasePage() {
   const [storageBytesTotal, setStorageBytesTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resyncingId, setResyncingId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function refresh() {
@@ -123,6 +124,18 @@ export default function KnowledgeBasePage() {
       setNotice(err instanceof ApiError ? err.message : "Couldn't remove that document.");
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleResync(id: string) {
+    setResyncingId(id);
+    try {
+      await api.post(`/knowledge/${id}/resync`);
+      await refresh(); // pick up the new "Processing" status immediately
+    } catch (err) {
+      setNotice(err instanceof ApiError ? err.message : "Couldn't re-sync that document.");
+    } finally {
+      setResyncingId(null);
     }
   }
 
@@ -189,7 +202,7 @@ export default function KnowledgeBasePage() {
             ))}
           </div>
           <CardContent className="p-0">
-            <DocumentTable docs={filtered} onDelete={handleDelete} deletingId={deletingId} />
+            <DocumentTable docs={filtered} onDelete={handleDelete} deletingId={deletingId} onResync={handleResync} resyncingId={resyncingId} />
           </CardContent>
         </Card>
       </main>
