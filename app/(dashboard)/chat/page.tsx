@@ -103,17 +103,17 @@ export default function ChatPage() {
     <>
       <Topnav title="AI Chat" subtitle="Grounded on your Knowledge Base" />
 
-      <main className="p-6 lg:p-8">
-        <Card className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr]">
+      <main className="p-6 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:p-8">
+        <Card className="flex flex-col overflow-hidden lg:h-full">
+          <div className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_1fr]">
             {/* Conversation list */}
-            <div className="border-b border-border lg:border-b-0 lg:border-r">
+            <div className="flex flex-col border-b border-border lg:border-b-0 lg:border-r">
               <div className="p-3.5">
                 <Button variant="secondary" size="sm" className="w-full" onClick={handleNewChat}>
                   <Plus className="h-3.5 w-3.5" /> New chat
                 </Button>
               </div>
-              <div className="max-h-[560px] overflow-y-auto px-2 pb-3">
+              <div className="max-h-[280px] overflow-y-auto px-2 pb-3 lg:min-h-0 lg:max-h-none lg:flex-1">
                 {sessions.map((s) => (
                   <button
                     key={s.id}
@@ -134,8 +134,8 @@ export default function ChatPage() {
             </div>
 
             {/* Chat */}
-            <div className="flex h-[640px] flex-col">
-              <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+            <div className="flex h-[560px] flex-col lg:h-auto lg:min-h-0">
+              <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-primary">
                     <Sparkles className="h-3.5 w-3.5 text-white" />
@@ -147,7 +147,7 @@ export default function ChatPage() {
                 </span>
               </div>
 
-              <div ref={scrollRef} className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+              <div ref={scrollRef} className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5">
                 {active.messages.map((m, i) => (
                   <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                     <div className={cn(
@@ -169,7 +169,7 @@ export default function ChatPage() {
                 )}
               </div>
 
-              <div className="border-t border-border p-4">
+              <div className="shrink-0 border-t border-border p-4">
                 <div className="flex items-end gap-2 rounded-control border border-border bg-white/[0.03] p-2 focus-within:border-primary">
                   <Button variant="ghost" size="icon" className="shrink-0">
                     <Paperclip className="h-4 w-4" />
