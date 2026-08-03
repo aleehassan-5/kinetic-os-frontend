@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DeploymentOnly } from "@/components/help/deployment-only";
 import { cn } from "@/lib/utils";
 
 interface TocItem {
@@ -272,19 +273,21 @@ export default function IntegrationsGuidePage() {
               </Section>
 
               <Section id="google-login" title={'Google Sign-in ("Continue with Google")'}>
-                <Provider
-                  name="Google OAuth Client"
-                  who="deployment"
-                  where="console.cloud.google.com"
-                  steps={[
-                    "Google Cloud Console → create a new project (or use an existing one).",
-                    "APIs & Services → OAuth consent screen — fill in an app name, support email, and set it to \"External\" (unless every user has a Google Workspace account on your own domain).",
-                    "APIs & Services → Credentials → Create Credentials → OAuth client ID → Application type: Web application.",
-                    "Under \"Authorized redirect URIs\" add both: https://your-api-domain/auth/google/callback (login) and https://your-api-domain/integrations/google/callback (Calendar booking, if you'll use that too).",
-                    "Copy the generated Client ID and Client Secret.",
-                  ]}
-                  free="Free. Google will show an unverified-app warning to users until you submit the consent screen for verification, which is worth doing before a real launch."
-                />
+                <DeploymentOnly>
+                  <Provider
+                    name="Google OAuth Client"
+                    who="deployment"
+                    where="console.cloud.google.com"
+                    steps={[
+                      "Google Cloud Console → create a new project (or use an existing one).",
+                      "APIs & Services → OAuth consent screen — fill in an app name, support email, and set it to \"External\" (unless every user has a Google Workspace account on your own domain).",
+                      "APIs & Services → Credentials → Create Credentials → OAuth client ID → Application type: Web application.",
+                      "Under \"Authorized redirect URIs\" add both: https://your-api-domain/auth/google/callback (login) and https://your-api-domain/integrations/google/callback (Calendar booking, if you'll use that too).",
+                      "Copy the generated Client ID and Client Secret.",
+                    ]}
+                    free="Free. Google will show an unverified-app warning to users until you submit the consent screen for verification, which is worth doing before a real launch."
+                  />
+                </DeploymentOnly>
               </Section>
 
               <Section id="ai-providers" title="AI Providers (chat replies, intent scoring)">
@@ -474,22 +477,24 @@ export default function IntegrationsGuidePage() {
                 </Link>
 
                 <p className="mt-2 text-[13px] leading-relaxed text-text-secondary">
-                  Automated card checkout is available when you&apos;re ready for it — set{" "}
-                  <code className="rounded bg-black/20 px-1 py-0.5 text-primary">BILLING_MODE=lemonsqueezy</code>:
+                  Automated card checkout is available when you&apos;re ready for it — ask whoever manages your
+                  deployment to switch it on:
                 </p>
-                <Provider
-                  name="Lemon Squeezy"
-                  who="deployment"
-                  where="lemonsqueezy.com"
-                  steps={[
-                    "Create a store at lemonsqueezy.com and complete their account verification (needed before you can accept real payments).",
-                    "Settings → API → Create API key.",
-                    "Your Store ID is shown right on that same Settings → API page.",
-                    "Create one product per plan tier (Starter / Growth / Scale) — each product's default variant ID is on its product page under Variants.",
-                    "Settings → Webhooks → Create webhook pointing at https://your-api-domain/webhooks/lemonsqueezy, subscribed to subscription events, and copy the signing secret shown there.",
-                  ]}
-                  free="Free to set up — Lemon Squeezy takes a percentage per transaction instead of a monthly fee."
-                />
+                <DeploymentOnly>
+                  <Provider
+                    name="Lemon Squeezy"
+                    who="deployment"
+                    where="lemonsqueezy.com"
+                    steps={[
+                      "Create a store at lemonsqueezy.com and complete their account verification (needed before you can accept real payments).",
+                      "Settings → API → Create API key.",
+                      "Your Store ID is shown right on that same Settings → API page.",
+                      "Create one product per plan tier (Starter / Growth / Scale) — each product's default variant ID is on its product page under Variants.",
+                      "Settings → Webhooks → Create webhook pointing at https://your-api-domain/webhooks/lemonsqueezy, subscribed to subscription events, and copy the signing secret shown there.",
+                    ]}
+                    free="Free to set up — Lemon Squeezy takes a percentage per transaction instead of a monthly fee."
+                  />
+                </DeploymentOnly>
                 <Note>
                   Lemon Squeezy checkout only accepts card and PayPal — and PayPal doesn&apos;t support
                   individual accounts in Pakistan. Confirm your customer base actually has international cards
@@ -498,17 +503,19 @@ export default function IntegrationsGuidePage() {
               </Section>
 
               <Section id="sentry" title="Sentry (error monitoring)">
-                <Provider
-                  name="Sentry"
-                  who="deployment"
-                  where="sentry.io"
-                  steps={[
-                    "Sign up at sentry.io (free tier is enough to start).",
-                    "Create a new project, framework: Node.js.",
-                    "Settings → Client Keys (DSN) → copy the DSN shown there.",
-                  ]}
-                  free="Free tier covers a generous volume of errors per month for a small business."
-                />
+                <DeploymentOnly>
+                  <Provider
+                    name="Sentry"
+                    who="deployment"
+                    where="sentry.io"
+                    steps={[
+                      "Sign up at sentry.io (free tier is enough to start).",
+                      "Create a new project, framework: Node.js.",
+                      "Settings → Client Keys (DSN) → copy the DSN shown there.",
+                    ]}
+                    free="Free tier covers a generous volume of errors per month for a small business."
+                  />
+                </DeploymentOnly>
                 <p className="text-[13px] leading-relaxed text-text-secondary">
                   Optional — errors are always logged locally on the server either way, this just also sends
                   them somewhere you can see without SSH-ing in.

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Topnav } from "@/components/layout/topnav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DeploymentOnly } from "@/components/help/deployment-only";
 import { cn } from "@/lib/utils";
 
 interface TocItem {
@@ -149,30 +150,32 @@ export default function BillingGuidePage() {
               </Section>
 
               <Section id="founder-side" title="Activating a customer (you)">
-                <p className="text-[13px] leading-relaxed text-text-secondary">
-                  Once you&apos;ve agreed on a price with a customer and confirmed the transfer landed (bank
-                  statement, JazzCash/Easypaisa SMS, or just their word for the first few), you flip their
-                  workspace to that plan using their workspace ID (visible in their Settings → Workspace) and
-                  the price you agreed on.
-                </p>
-                <Step n={1}>
-                  Get their <strong className="text-text-primary">workspace ID</strong> — visible in Settings →
-                  Workspace on their account, or ask them to send a screenshot.
-                </Step>
-                <Step n={2}>
-                  Activate their plan for the exact amount you agreed on. This is a deployment-level action, not
-                  something inside the app — see the internal ops notes for whoever manages your Kinetic OS
-                  server for exactly how.
-                </Step>
-                <Step n={3}>
-                  Their plan activates immediately, a real PAID invoice for that exact amount appears on their
-                  Billing page, and their usage limits update to the new plan&apos;s tier.
-                </Step>
-                <Note>
-                  The activation step is deliberately not a button inside the app — it&apos;s protected
-                  separately so no logged-in customer can ever activate their own plan for free. Only whoever
-                  holds the deployment&apos;s admin credentials can do this.
-                </Note>
+                <DeploymentOnly>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">
+                    Once you&apos;ve agreed on a price with a customer and confirmed the transfer landed (bank
+                    statement, JazzCash/Easypaisa SMS, or just their word for the first few), you flip their
+                    workspace to that plan using their workspace ID (visible in their Settings → Workspace) and
+                    the price you agreed on.
+                  </p>
+                  <Step n={1}>
+                    Get their <strong className="text-text-primary">workspace ID</strong> — visible in Settings →
+                    Workspace on their account, or ask them to send a screenshot.
+                  </Step>
+                  <Step n={2}>
+                    Activate their plan for the exact amount you agreed on. This is a deployment-level action, not
+                    something inside the app — see the internal ops notes for whoever manages your Kinetic OS
+                    server for exactly how.
+                  </Step>
+                  <Step n={3}>
+                    Their plan activates immediately, a real PAID invoice for that exact amount appears on their
+                    Billing page, and their usage limits update to the new plan&apos;s tier.
+                  </Step>
+                  <Note>
+                    The activation step is deliberately not a button inside the app — it&apos;s protected
+                    separately so no logged-in customer can ever activate their own plan for free. Only whoever
+                    holds the deployment&apos;s admin credentials can do this.
+                  </Note>
+                </DeploymentOnly>
               </Section>
 
               <Section id="pricing" title="How pricing works">
@@ -185,25 +188,24 @@ export default function BillingGuidePage() {
                 <p className="text-[13px] leading-relaxed text-text-secondary">
                   Starter / Growth / Scale still exist behind the scenes purely as{" "}
                   <strong className="text-text-primary">feature tiers</strong> — they control how many
-                  leads/AI messages/workflow runs/team seats a workspace gets, nothing about price. When you
-                  activate a customer (see the previous section), you pick whichever tier matches what you sold
-                  them and enter the exact amount they&apos;re paying — that amount is what shows on their
-                  invoice, full stop.
+                  leads/AI messages/workflow runs/team seats a workspace gets, nothing about price.
                 </p>
               </Section>
 
               <Section id="setup" title="One-time setup">
-                <p className="text-[13px] leading-relaxed text-text-secondary">
-                  Before the payment modal shows anything useful, whoever manages your deployment needs to add
-                  your WhatsApp number and whichever payment details you actually want to offer — bank account,
-                  Easypaisa, and/or JazzCash. All optional independently; whatever isn&apos;t set just doesn&apos;t
-                  show up in the customer&apos;s payment modal.
-                </p>
-                <Note>
-                  This is configured on the backend server, not inside this app — send your WhatsApp number and
-                  payment details to whoever set up your Kinetic OS deployment, the same way you would for any
-                  other account-level setting.
-                </Note>
+                <DeploymentOnly>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">
+                    Before the payment modal shows anything useful, whoever manages your deployment needs to add
+                    your WhatsApp number and whichever payment details you actually want to offer — bank account,
+                    Easypaisa, and/or JazzCash. All optional independently; whatever isn&apos;t set just doesn&apos;t
+                    show up in the customer&apos;s payment modal.
+                  </p>
+                  <Note>
+                    This is configured on the backend server, not inside this app — send your WhatsApp number and
+                    payment details to whoever set up your Kinetic OS deployment, the same way you would for any
+                    other account-level setting.
+                  </Note>
+                </DeploymentOnly>
               </Section>
 
               <Section id="switching" title="Switching to automated billing later">

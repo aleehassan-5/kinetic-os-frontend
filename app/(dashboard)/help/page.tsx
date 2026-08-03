@@ -347,7 +347,7 @@ export default function HelpPage() {
                   <p>Click to expand/collapse. Click any platform tile to connect or update it.</p>
                   <BtnList
                     items={[
-                      { name: "Account / Page ID + Display name", does: "Tells Kinetic OS which of your already-authorized accounts to publish to. This does not do the OAuth authorization itself — the platform access token is configured once on the backend by whoever manages your deployment." },
+                      { name: "Account / Page ID + Display name", does: "Tells Kinetic OS which of your connected accounts to publish to. Connect or reconnect an account from Settings → Integrations → Social Accounts." },
                       { name: "Auto-reply to comments toggle", does: "When on, the AI assistant automatically replies to comments on your posts for that platform." },
                     ]}
                   />
@@ -396,10 +396,9 @@ export default function HelpPage() {
                     on Calendly/Google&apos;s own site.
                   </p>
                   <Note>
-                    Both cards show &quot;Not connected&quot; by default in this UI — Calendly and Google Calendar
-                    are set up once for the whole deployment (by whoever manages the backend), not per-workspace
-                    from inside the app yet. If your team uses either, meetings booked through them will still
-                    show up in the list below once they&apos;re configured on the backend.
+                    If a card shows &quot;Not connected,&quot; connect Calendly or Google Calendar yourself from{" "}
+                    <a href="#settings" className="text-primary hover:underline">Settings → Integrations → Scheduling</a> —
+                    meetings booked through it will start showing up in the list below right after.
                   </Note>
                 </Sub>
                 <Sub title="Meeting list">
@@ -506,10 +505,12 @@ export default function HelpPage() {
                     ]}
                   />
                   <p>
-                    Further down, <strong className="text-text-primary">Scheduling</strong> (Calendly, Google
-                    Calendar) and <strong className="text-text-primary">CRM</strong> (HubSpot, Google Sheets)
-                    sections show real connection status but are read-only here — those are set up once on the
-                    backend by whoever manages your deployment, not connected per-person from this screen.
+                    Further down, <strong className="text-text-primary">AI Providers</strong> (OpenAI, Anthropic,
+                    ElevenLabs), <strong className="text-text-primary">Scheduling</strong> (Calendly, Google
+                    Calendar), <strong className="text-text-primary">CRM</strong> (HubSpot, Google Sheets), and{" "}
+                    <strong className="text-text-primary">Social Accounts</strong> (Instagram, Facebook, TikTok,
+                    LinkedIn publishing) all work the same self-serve way — Connect, paste your credentials, test,
+                    save.
                   </p>
                 </Sub>
 
