@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Camera } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,40 @@ export function ProfileSection() {
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = React.useState(false);
+  const [avatarError, setAvatarError] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (user?.name) setName(user.name);
   }, [user?.name]);
 
   const initials = (user?.name ?? "").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "?";
+
+  async function handleAvatarFile(file: File | undefined) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setAvatarError("Please choose a JPG or PNG image.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("Image must be under 2MB.");
+      return;
+    }
+    setAvatarError(null);
+    setUploadingAvatar(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      await api.post("/auth/me/avatar", form, { isFormData: true });
+      await refetchMe();
+    } catch (err) {
+      setAvatarError(err instanceof ApiError ? err.message : "Couldn't upload that photo. Please try again.");
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -54,25 +82,47 @@ export function ProfileSection() {
               {error}
             </div>
           )}
+          {avatarError && (
+            <div className="rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
+              {avatarError}
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-[18px] font-semibold text-white">
-                {initials}
-              </div>
+              {user?.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- user-uploaded photo served from our own backend, not a static asset Next can optimize at build time
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-[18px] font-semibold text-white">
+                  {initials}
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png"
+                className="hidden"
+                onChange={(e) => handleAvatarFile(e.target.files?.[0])}
+              />
               <button
                 type="button"
-                title="Photo uploads aren't available yet"
-                disabled
-                className="absolute -bottom-1 -right-1 flex h-6 w-6 cursor-not-allowed items-center justify-center rounded-full border border-border bg-card text-text-muted opacity-60"
+                title="Change photo"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-text-secondary transition-colors duration-200 hover:border-border-strong hover:text-text-primary disabled:cursor-wait disabled:opacity-60"
                 aria-label="Change photo"
               >
-                <Camera className="h-3 w-3" />
+                {uploadingAvatar ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />}
               </button>
             </div>
             <div>
               <p className="text-[13px] font-medium text-text-primary">{user?.name ?? "—"}</p>
-              <p className="text-[11.5px] text-text-muted">JPG or PNG, max 2MB — photo uploads coming soon</p>
+              <p className="text-[11.5px] text-text-muted">JPG or PNG, max 2MB</p>
             </div>
           </div>
 

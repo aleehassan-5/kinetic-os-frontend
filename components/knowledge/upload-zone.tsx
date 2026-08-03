@@ -95,8 +95,17 @@ export function UploadZone({
           setDragging(false);
           handleFiles(e.dataTransfer.files);
         }}
+        onClick={() => !uploading && fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            if (!uploading) fileInputRef.current?.click();
+          }
+        }}
         className={cn(
-          "rounded-card border-2 border-dashed p-8 text-center transition-colors duration-200",
+          "cursor-pointer rounded-card border-2 border-dashed p-8 text-center transition-colors duration-200",
           dragging ? "border-primary bg-primary-muted/30" : "border-border hover:border-border-strong"
         )}
       >
@@ -118,7 +127,10 @@ export function UploadZone({
               Drop files here, or{" "}
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
                 className="text-primary hover:text-primary-hover"
               >
                 browse
@@ -129,10 +141,10 @@ export function UploadZone({
         <p className="mt-1 text-[12px] text-text-secondary">PDF, DOCX, XLSX, CSV, TXT — up to 50 MB each</p>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          <Button variant="secondary" size="sm" onClick={() => setCrawlOpen(true)}>
+          <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setCrawlOpen(true); }}>
             <Link2 className="h-3.5 w-3.5" /> Crawl a website
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => setFaqOpen(true)}>
+          <Button variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); setFaqOpen(true); }}>
             <MessageSquarePlus className="h-3.5 w-3.5" /> Add FAQ manually
           </Button>
         </div>

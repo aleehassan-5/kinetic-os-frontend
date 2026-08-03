@@ -65,6 +65,7 @@ function mapDoc(d: ApiDocument): KnowledgeDoc {
     chunks: d.chunkCount,
     lastSynced: d.status === "FAILED" ? `Failed ${formatRelativeTime(d.updatedAt)}` : formatRelativeTime(d.updatedAt),
     source: d.sourceType === "URL" ? "Website crawl" : d.sourceType === "FAQ" ? "Manual entry" : "Uploaded",
+    sourceUrl: d.sourceUrl,
   };
 }
 
@@ -172,7 +173,7 @@ export default function KnowledgeBasePage() {
 
         <UploadZone onUploadFile={handleUploadFile} onCrawl={handleCrawl} onAddFaq={handleAddFaq} />
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-visible">
           <div className="flex items-center gap-1.5 border-b border-border p-3.5">
             {filters.map((f) => (
               <button
