@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sparkles, Send, Paperclip, BookOpen, Plus, MessageSquare } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card } from "@/components/ui/card";
@@ -50,6 +50,11 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
 
   const active = sessions.find((s) => s.id === activeSessionId) ?? sessions[0];
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [active.messages.length, sending, activeSessionId]);
 
   function updateActive(updater: (s: Session) => Session) {
     setSessions((prev) => prev.map((s) => (s.id === activeSessionId ? updater(s) : s)));
@@ -142,7 +147,7 @@ export default function ChatPage() {
                 </span>
               </div>
 
-              <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
+              <div ref={scrollRef} className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
                 {active.messages.map((m, i) => (
                   <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                     <div className={cn(

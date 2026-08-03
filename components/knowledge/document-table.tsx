@@ -1,9 +1,71 @@
-import { FileText, FileSpreadsheet, Globe, HelpCircle, File, RotateCw, Trash2, MoreHorizontal, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FileText, FileSpreadsheet, Globe, HelpCircle, File, RotateCw, Trash2, MoreHorizontal, Loader2, ExternalLink, Copy, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { KnowledgeDoc, typeStyle, statusVariant } from "./data";
 
 const typeIcon = { PDF: FileText, DOCX: File, URL: Globe, FAQ: HelpCircle, Sheet: FileSpreadsheet };
+
+function RowActionsMenu({ doc }: { doc: KnowledgeDoc }) {
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  async function copyId() {
+    try {
+      await navigator.clipboard.writeText(doc.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard may be blocked — fail silently, nothing else to do here
+    }
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary"
+        title="More"
+      >
+        <MoreHorizontal className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-[calc(100%+4px)] z-10 w-44 overflow-hidden rounded-control border border-border bg-card shadow-lg">
+          {doc.sourceUrl && (
+            <a
+              href={doc.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-left text-[12.5px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.04] hover:text-text-primary"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Open source
+            </a>
+          )}
+          <button
+            onClick={() => {
+              copyId();
+              setOpen(false);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[12.5px] text-text-secondary transition-colors duration-200 hover:bg-white/[0.04] hover:text-text-primary"
+          >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} Copy document ID
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function DocumentTable({
   docs,
@@ -82,9 +144,7 @@ export function DocumentTable({
                         <Trash2 className="h-3.5 w-3.5" />
                       )}
                     </button>
-                    <button className="rounded-control p-1.5 text-text-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-text-primary">
-                      <MoreHorizontal className="h-3.5 w-3.5" />
-                    </button>
+                    <RowActionsMenu doc={doc} />
                   </div>
                 </td>
               </tr>

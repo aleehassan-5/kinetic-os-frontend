@@ -10,6 +10,7 @@ export interface KnowledgeDoc {
   chunks: number;
   lastSynced: string;
   source: string;
+  sourceUrl?: string | null;
 }
 
 export const typeStyle: Record<DocType, { bg: string; text: string }> = {

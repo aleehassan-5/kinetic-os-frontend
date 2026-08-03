@@ -76,7 +76,7 @@ export default function TeamPage() {
           </Button>
         </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-visible">
           <CardContent className="p-0">
             {loading ? (
               <div className="flex items-center justify-center gap-2 p-10 text-[13px] text-text-muted">
