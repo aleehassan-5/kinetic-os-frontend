@@ -9,14 +9,16 @@ import { MobileNavProvider } from "@/components/layout/mobile-nav-context";
 import { useAuth } from "@/lib/auth-context";
 
 export default function DashboardGroupLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, isSuperAdmin, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
-  }, [loading, user, router]);
+    if (loading) return;
+    if (!user) router.replace("/login");
+    else if (isSuperAdmin) router.replace("/admin");
+  }, [loading, user, isSuperAdmin, router]);
 
-  if (loading || !user) {
+  if (loading || !user || isSuperAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-text-muted" />

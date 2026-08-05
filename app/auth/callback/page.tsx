@@ -22,7 +22,7 @@ function CallbackInner() {
     }
 
     loginWithTokens(accessToken, refreshToken)
-      .then(() => router.replace("/dashboard"))
+      .then(({ isSuperAdmin }) => router.replace(isSuperAdmin ? "/admin" : "/dashboard"))
       .catch(() => setError(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

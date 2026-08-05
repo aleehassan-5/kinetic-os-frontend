@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, ApiError, clearTokens, getAccessToken, setTokens } from "./api-client";
+import { api, ApiError, clearTokens, getAccessToken, getRefreshToken, setTokens } from "./api-client";
 
 export interface WorkspaceUser {
   id: string;
@@ -20,12 +20,13 @@ export interface Workspace {
   industry?: string | null;
 }
 
-export type Role = "OWNER" | "ADMIN" | "EDITOR" | "VIEWER";
+export type Role = "OWNER" | "ADMIN" | "EDITOR" | "VIEWER" | "SUPER_ADMIN";
 
 interface MeResponse {
   user: WorkspaceUser;
-  workspace: Workspace;
+  workspace: Workspace | null;
   role: Role;
+  isSuperAdmin: boolean;
 }
 
 interface AuthTokens {
@@ -33,14 +34,24 @@ interface AuthTokens {
   refreshToken: string;
 }
 
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+  businessName: string;
+  niche?: string;
+  phone?: string;
+}
+
 interface AuthContextValue {
   user: WorkspaceUser | null;
   workspace: Workspace | null;
   role: Role | null;
+  isSuperAdmin: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithTokens: (accessToken: string, refreshToken: string) => Promise<void>;
-  register: (input: { name: string; email: string; password: string; workspaceName: string }) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ isSuperAdmin: boolean }>;
+  loginWithTokens: (accessToken: string, refreshToken: string) => Promise<{ isSuperAdmin: boolean }>;
+  register: (input: RegisterInput) => Promise<{ message: string }>;
   logout: () => Promise<void>;
   refetchMe: () => Promise<void>;
 }
@@ -51,21 +62,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<WorkspaceUser | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [role, setRole] = useState<Role | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const fetchMe = useCallback(async () => {
+  const loadMe = useCallback(async (): Promise<MeResponse | null> => {
     try {
       const data = await api.get<MeResponse>("/auth/me");
       setUser(data.user);
       setWorkspace(data.workspace);
       setRole(data.role);
+      setIsSuperAdmin(data.isSuperAdmin);
+      return data;
     } catch {
       setUser(null);
       setWorkspace(null);
       setRole(null);
+      setIsSuperAdmin(false);
+      return null;
     }
   }, []);
+
+  const fetchMe = useCallback(async () => {
+    await loadMe();
+  }, [loadMe]);
 
   useEffect(() => {
     (async () => {
@@ -85,9 +105,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         { skipAuth: true }
       );
       setTokens(data.accessToken, data.refreshToken);
-      await fetchMe();
+      const me = await loadMe();
+      return { isSuperAdmin: me?.isSuperAdmin ?? false };
     },
-    [fetchMe]
+    [loadMe]
   );
 
   // Used by /auth/callback after "Continue with Google" — the backend has
@@ -95,22 +116,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithTokens = useCallback(
     async (accessToken: string, refreshToken: string) => {
       setTokens(accessToken, refreshToken);
-      await fetchMe();
+      const me = await loadMe();
+      return { isSuperAdmin: me?.isSuperAdmin ?? false };
     },
-    [fetchMe]
+    [loadMe]
   );
 
-  const register = useCallback(
-    async (input: { name: string; email: string; password: string; workspaceName: string }) => {
-      const data = await api.post<{ user: WorkspaceUser } & AuthTokens>("/auth/register", input, { skipAuth: true });
-      setTokens(data.accessToken, data.refreshToken);
-      await fetchMe();
-    },
-    [fetchMe]
-  );
+  // No tokens are issued at signup anymore — every new account starts
+  // PENDING until a super_admin approves it. This just creates the account
+  // and returns the "under review" message for the pending screen to show.
+  const register = useCallback(async (input: RegisterInput) => {
+    const data = await api.post<{ status: "pending"; message: string; accountId: string }>(
+      "/auth/register",
+      input,
+      { skipAuth: true }
+    );
+    return { message: data.message };
+  }, []);
 
   const logout = useCallback(async () => {
-    const refreshToken = typeof window !== "undefined" ? localStorage.getItem("orbit_refresh_token") : null;
+    const refreshToken = getRefreshToken();
     try {
       if (refreshToken) await api.post("/auth/logout", { refreshToken }, { skipAuth: true });
     } catch {
@@ -120,11 +145,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setWorkspace(null);
     setRole(null);
+    setIsSuperAdmin(false);
     router.push("/login");
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ user, workspace, role, loading, login, loginWithTokens, register, logout, refetchMe: fetchMe }}>
+    <AuthContext.Provider
+      value={{ user, workspace, role, isSuperAdmin, loading, login, loginWithTokens, register, logout, refetchMe: fetchMe }}
+    >
       {children}
     </AuthContext.Provider>
   );

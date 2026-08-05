@@ -26,9 +26,9 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      const { isSuperAdmin } = await login(email, password);
       setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 700);
+      setTimeout(() => router.push(isSuperAdmin ? "/admin" : "/dashboard"), 700);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Invalid email or password. Please try again.");
       setLoading(false);
@@ -125,9 +125,9 @@ export default function LoginPage() {
           </Button>
 
           <p className="mt-8 text-center text-[13px] text-text-secondary">
-            Don&apos;t have a workspace?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/signup" className="font-medium text-primary hover:text-primary-hover">
-              Create one
+              Apply for access
             </Link>
           </p>
         </div>

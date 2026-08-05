@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Building2, ArrowRight } from "lucide-react";
+import { Mail, Lock, Building2, Briefcase, Phone, ArrowRight } from "lucide-react";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
@@ -13,11 +13,12 @@ import { GoogleIcon } from "@/components/ui/google-icon";
 
 export default function SignupPage() {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [company, setCompany] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [niche, setNiche] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { register } = useAuth();
@@ -25,7 +26,7 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (loading || success) return; // guard against double-submit on rapid clicks
+    if (loading) return; // guard against double-submit on rapid clicks
     setError(null);
     setLoading(true);
     try {
@@ -33,12 +34,13 @@ export default function SignupPage() {
         name: `${firstName} ${lastName}`.trim(),
         email,
         password,
-        workspaceName: company,
+        businessName,
+        niche: niche || undefined,
+        phone: phone || undefined,
       });
-      setSuccess(true);
-      setTimeout(() => router.push("/dashboard"), 900);
+      router.push("/signup/pending");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not create your workspace. Please try again.");
+      setError(err instanceof ApiError ? err.message : "Could not create your account. Please try again.");
       setLoading(false);
     }
   }
@@ -51,20 +53,14 @@ export default function SignupPage() {
           <span className="font-display text-[16px] font-semibold tracking-tight text-text-primary">Kinetic OS</span>
         </div>
 
-        <h1 className="font-display text-[24px] font-medium tracking-tight text-text-primary">Create your workspace</h1>
+        <h1 className="font-display text-[24px] font-medium tracking-tight text-text-primary">Apply for access</h1>
         <p className="mt-1.5 text-[13.5px] text-text-secondary">
-          Start automating leads and content in under 10 minutes.
+          Every new account is reviewed before it goes live — tell us a bit about your business.
         </p>
 
         {error && (
           <div className="mt-5 rounded-control border border-danger/20 bg-danger-muted px-3.5 py-2.5 text-[13px] text-danger animate-slide-up">
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mt-5 rounded-control border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-[13px] text-emerald-500 animate-slide-up">
-            Account created! Taking you to your dashboard…
           </div>
         )}
 
@@ -81,10 +77,47 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="company">Company</Label>
+            <Label htmlFor="businessName">Business name</Label>
             <div className="relative">
               <Building2 className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
-              <Input id="company" placeholder="Acme Growth Agency" required className="pl-9" value={company} onChange={(e) => setCompany(e.target.value)} />
+              <Input
+                id="businessName"
+                placeholder="Acme Real Estate"
+                required
+                className="pl-9"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="niche">Industry</Label>
+              <div className="relative">
+                <Briefcase className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
+                <Input
+                  id="niche"
+                  placeholder="Real estate"
+                  className="pl-9"
+                  value={niche}
+                  onChange={(e) => setNiche(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="phone">Phone</Label>
+              <div className="relative">
+                <Phone className="pointer-events-none absolute left-3 top-1/2 h-[15px] w-[15px] -translate-y-1/2 text-text-muted" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="0300 1234567"
+                  className="pl-9"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -113,14 +146,13 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading || success}>
-            {!loading && !success && (
+          <Button type="submit" className="w-full" size="lg" loading={loading} disabled={loading}>
+            {!loading && (
               <>
-                Create workspace <ArrowRight className="h-4 w-4" />
+                Submit application <ArrowRight className="h-4 w-4" />
               </>
             )}
-            {loading && "Creating…"}
-            {success && "Account created ✓"}
+            {loading && "Submitting…"}
           </Button>
         </form>
 
@@ -130,15 +162,12 @@ export default function SignupPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="secondary" size="lg" asChild>
-            <a href={`${API_URL}/auth/google`}>
-              <GoogleIcon className="h-4 w-4" />
-              Google
-            </a>
-          </Button>
-          <Button variant="secondary" size="lg">Microsoft</Button>
-        </div>
+        <Button variant="secondary" size="lg" className="w-full" asChild>
+          <a href={`${API_URL}/auth/google`}>
+            <GoogleIcon className="h-4 w-4" />
+            Continue with Google
+          </a>
+        </Button>
 
         <p className="mt-6 text-center text-[12px] leading-relaxed text-text-muted">
           By continuing you agree to our{" "}
@@ -147,7 +176,7 @@ export default function SignupPage() {
         </p>
 
         <p className="mt-5 text-center text-[13px] text-text-secondary">
-          Already have a workspace?{" "}
+          Already approved?{" "}
           <Link href="/login" className="font-medium text-primary hover:text-primary-hover">
             Sign in
           </Link>
