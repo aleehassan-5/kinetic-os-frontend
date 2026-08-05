@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
@@ -33,9 +34,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Kinetic OS <span className="font-sans text-[12.5px] font-normal text-text-muted">— Platform Admin</span>
           </span>
         </div>
-        <button onClick={logout} className="text-[13px] font-medium text-text-secondary hover:text-text-primary">
-          Log out
-        </button>
+        <div className="flex items-center gap-5">
+          <Link href="/admin/account" className="text-[13px] font-medium text-text-secondary hover:text-text-primary">
+            Account
+          </Link>
+          <button onClick={logout} className="text-[13px] font-medium text-text-secondary hover:text-text-primary">
+            Log out
+          </button>
+        </div>
       </header>
       <main className="p-6 lg:p-8">{children}</main>
     </div>

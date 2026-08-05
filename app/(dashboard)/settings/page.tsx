@@ -4,6 +4,7 @@ import * as React from "react";
 import { Topnav } from "@/components/layout/topnav";
 import { SettingsNav, type SettingsTab } from "@/components/settings/settings-nav";
 import { ProfileSection } from "@/components/settings/profile-section";
+import { ChangePasswordCard } from "@/components/account/change-password-card";
 import { WorkspaceSection } from "@/components/settings/workspace-section";
 import { NotificationsSection } from "@/components/settings/notifications-section";
 import { IntegrationsSection } from "@/components/settings/integrations-section";
@@ -20,7 +21,12 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-6 lg:flex-row">
           <SettingsNav active={tab} onChange={setTab} />
           <div className="min-w-0 flex-1 space-y-6">
-            {tab === "profile" && <ProfileSection />}
+            {tab === "profile" && (
+              <>
+                <ProfileSection />
+                <ChangePasswordCard />
+              </>
+            )}
             {tab === "workspace" && <WorkspaceSection />}
             {tab === "notifications" && <NotificationsSection />}
             {tab === "integrations" && <IntegrationsSection />}
