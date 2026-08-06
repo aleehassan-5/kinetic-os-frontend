@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Phone, Calendar, Sparkles, Send, MoreHorizontal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Modal } from "@/components/ui/modal";
+import { Input, Label } from "@/components/ui/input";
 import { Lead, channelStyles, statusToApi, type ApiLead, type ApiLeadDetail, type ApiMessage } from "./data";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api-client";
@@ -31,6 +33,18 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const [meetingModalOpen, setMeetingModalOpen] = useState(false);
+  const [meetingTopic, setMeetingTopic] = useState("");
+  const [meetingDate, setMeetingDate] = useState("");
+  const [meetingTime, setMeetingTime] = useState("");
+  const [savingMeeting, setSavingMeeting] = useState(false);
+  const [meetingError, setMeetingError] = useState<string | null>(null);
+
+  const [callModalOpen, setCallModalOpen] = useState(false);
+  const [callNotes, setCallNotes] = useState("");
+  const [savingCall, setSavingCall] = useState(false);
+  const [callError, setCallError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -85,6 +99,60 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
     }
   }
 
+  async function submitMeeting() {
+    if (savingMeeting) return;
+    if (!meetingDate || !meetingTime) {
+      setMeetingError("Pick a date and time.");
+      return;
+    }
+    const startTime = new Date(`${meetingDate}T${meetingTime}`);
+    if (Number.isNaN(startTime.getTime())) {
+      setMeetingError("That date/time doesn't look right.");
+      return;
+    }
+    const endTime = new Date(startTime.getTime() + 30 * 60 * 1000); // default 30 min slot
+
+    setSavingMeeting(true);
+    setMeetingError(null);
+    try {
+      await api.post(`/leads/${lead.id}/meetings`, {
+        topic: meetingTopic.trim() || undefined,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      });
+      setMeetingModalOpen(false);
+      setMeetingTopic("");
+      setMeetingDate("");
+      setMeetingTime("");
+      onUpdated?.({ ...lead, status: "Booked" } as unknown as ApiLead);
+    } catch {
+      setMeetingError("Couldn't schedule the meeting — try again.");
+    } finally {
+      setSavingMeeting(false);
+    }
+  }
+
+  async function submitCallLog() {
+    if (savingCall) return;
+    const notes = callNotes.trim();
+    if (!notes) {
+      setCallError("Add a quick note about the call.");
+      return;
+    }
+    setSavingCall(true);
+    setCallError(null);
+    try {
+      const message = await api.post<ApiMessage>(`/leads/${lead.id}/log-call`, { notes });
+      setMessages((prev) => [...prev, message]);
+      setCallModalOpen(false);
+      setCallNotes("");
+    } catch {
+      setCallError("Couldn't log the call — try again.");
+    } finally {
+      setSavingCall(false);
+    }
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -116,7 +184,7 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
               disabled={savingStatus}
               onChange={(e) => changeStatus(e.target.value as Lead["status"])}
               className="appearance-none rounded bg-transparent pr-4 text-[11px] font-medium focus:outline-none"
-              style={{ color: "inherit" }}
+              style={{ color: "transparent" }}
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s} className="bg-card text-text-primary">
@@ -195,8 +263,12 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
 
       <div className="border-t border-border p-4">
         <div className="mb-2 flex gap-2">
-          <Button variant="secondary" size="sm"><Calendar className="h-3.5 w-3.5" /> Schedule Meeting</Button>
-          <Button variant="secondary" size="sm"><Phone className="h-3.5 w-3.5" /> Log Call</Button>
+          <Button variant="secondary" size="sm" onClick={() => setMeetingModalOpen(true)}>
+            <Calendar className="h-3.5 w-3.5" /> Schedule Meeting
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setCallModalOpen(true)}>
+            <Phone className="h-3.5 w-3.5" /> Log Call
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <input
@@ -216,6 +288,58 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
           </Button>
         </div>
       </div>
+
+      <Modal
+        open={meetingModalOpen}
+        onClose={() => setMeetingModalOpen(false)}
+        title="Schedule meeting"
+        description={`With ${lead.name ?? "this lead"} — 30 min slot`}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label>Topic (optional)</Label>
+            <Input value={meetingTopic} onChange={(e) => setMeetingTopic(e.target.value)} placeholder="Intro call" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Date</Label>
+              <Input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} />
+            </div>
+            <div>
+              <Label>Time</Label>
+              <Input type="time" value={meetingTime} onChange={(e) => setMeetingTime(e.target.value)} />
+            </div>
+          </div>
+          {meetingError && <p className="text-[12px] text-danger">{meetingError}</p>}
+          <Button className="w-full" onClick={submitMeeting} disabled={savingMeeting}>
+            {savingMeeting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Schedule"}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={callModalOpen}
+        onClose={() => setCallModalOpen(false)}
+        title="Log a call"
+        description={`With ${lead.name ?? "this lead"}`}
+      >
+        <div className="space-y-3">
+          <div>
+            <Label>What happened on the call?</Label>
+            <textarea
+              value={callNotes}
+              onChange={(e) => setCallNotes(e.target.value)}
+              placeholder="e.g. Discussed pricing, follow up next week"
+              rows={4}
+              className="w-full rounded-control border border-border bg-white/[0.03] px-3.5 py-2.5 text-[13px] text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
+            />
+          </div>
+          {callError && <p className="text-[12px] text-danger">{callError}</p>}
+          <Button className="w-full" onClick={submitCallLog} disabled={savingCall}>
+            {savingCall ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save call log"}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
