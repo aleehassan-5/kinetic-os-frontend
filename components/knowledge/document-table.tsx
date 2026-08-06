@@ -123,7 +123,11 @@ export function DocumentTable({
                   </div>
                 </td>
                 <td className="px-3 py-3.5">
-                  <Badge variant={statusVariant[doc.status]} dot={doc.status !== "Processing"}>
+                  <Badge
+                    variant={statusVariant[doc.status]}
+                    dot={doc.status !== "Processing"}
+                    title={doc.status === "Failed" && doc.error ? doc.error : undefined}
+                  >
                     {doc.status === "Processing" && <Loader2 className="h-3 w-3 animate-spin" />}
                     {doc.status}
                   </Badge>

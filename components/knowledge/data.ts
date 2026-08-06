@@ -11,6 +11,7 @@ export interface KnowledgeDoc {
   lastSynced: string;
   source: string;
   sourceUrl?: string | null;
+  error?: string | null;
 }
 
 export const typeStyle: Record<DocType, { bg: string; text: string }> = {

@@ -22,6 +22,7 @@ interface ApiDocument {
   storageBytes: number;
   createdAt: string;
   updatedAt: string;
+  error?: string | null;
 }
 
 const typeFromSource: Record<ApiDocument["sourceType"], DocType> = {
@@ -66,6 +67,7 @@ function mapDoc(d: ApiDocument): KnowledgeDoc {
     lastSynced: d.status === "FAILED" ? `Failed ${formatRelativeTime(d.updatedAt)}` : formatRelativeTime(d.updatedAt),
     source: d.sourceType === "URL" ? "Website crawl" : d.sourceType === "FAQ" ? "Manual entry" : "Uploaded",
     sourceUrl: d.sourceUrl,
+    error: d.error,
   };
 }
 
