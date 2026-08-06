@@ -56,9 +56,9 @@ export default function LeadsPage() {
     <>
       <Topnav title="Lead Inbox" subtitle="Omni-channel — WhatsApp, Instagram, Telegram, Messenger, Email" />
 
-      <main className="p-6 lg:p-8">
-        <Card className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr]">
+      <main className="p-6 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:p-8">
+        <Card className="flex flex-col overflow-hidden lg:h-full">
+          <div className="grid grid-cols-1 lg:min-h-0 lg:flex-1 lg:grid-cols-[380px_1fr]">
             {/* List */}
             <div className="flex flex-col border-b border-border lg:border-b-0 lg:border-r">
               <div className="flex items-center justify-between border-b border-border p-3.5">
@@ -79,7 +79,7 @@ export default function LeadsPage() {
                 <FilterPopover filters={advanced} onChange={setAdvanced} />
               </div>
 
-              <div className="max-h-[640px] overflow-y-auto">
+              <div className="max-h-[640px] overflow-y-auto lg:min-h-0 lg:max-h-none lg:flex-1">
                 {loading ? (
                   <>
                     <LeadRowSkeleton />
@@ -103,7 +103,7 @@ export default function LeadsPage() {
             </div>
 
             {/* Detail */}
-            <div className="h-[640px]">
+            <div className="h-[640px] lg:h-auto lg:min-h-0">
               {loading ? (
                 <div className="flex h-full items-center justify-center">
                   <Loader2 className="h-5 w-5 animate-spin text-text-muted" />

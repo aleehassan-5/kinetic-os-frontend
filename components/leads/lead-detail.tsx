@@ -226,7 +226,7 @@ export function LeadDetail({ lead, onUpdated }: { lead: Lead; onUpdated?: (updat
         </div>
       )}
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
         {loading ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-text-muted" />
