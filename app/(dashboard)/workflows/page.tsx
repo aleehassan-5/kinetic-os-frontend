@@ -13,14 +13,22 @@ import { WorkflowCanvas } from "@/components/workflows/workflow-canvas";
 import { NodePalette } from "@/components/workflows/node-palette";
 import { NodeInspector } from "@/components/workflows/node-inspector";
 import { WorkflowSwitcher, WorkflowSummary } from "@/components/workflows/workflow-switcher";
-import { DEFAULT_BACKEND_GRAPH } from "@/components/workflows/data";
+import {
+  DEFAULT_GRAPH,
+  EditorGraph,
+  EditorNodeData,
+  Position,
+  PaletteKind,
+  ensurePositions,
+  makeNode,
+} from "@/components/workflows/graph-types";
 import { api, ApiError } from "@/lib/api-client";
 
 interface ApiWorkflow {
   id: string;
   name: string;
   status: "DRAFT" | "ACTIVE" | "PAUSED";
-  graph: unknown;
+  graph: EditorGraph;
   createdAt: string;
   updatedAt: string;
 }
@@ -52,11 +60,17 @@ function WorkflowsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [selectedId, setSelectedId] = useState<string | null>("n2");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [workflows, setWorkflows] = useState<ApiWorkflow[]>([]);
   const [activeWorkflowId, setActiveWorkflowId] = useState<string | null>(null);
   const [runs, setRuns] = useState<ApiWorkflowRun[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // The graph actively being edited on the canvas. Seeded from the active
+  // workflow whenever it changes, then edited locally (add/move/connect/
+  // delete/rename) and persisted to the backend on "Save workflow".
+  const [graph, setGraph] = useState<EditorGraph>(DEFAULT_GRAPH);
+  const [dirty, setDirty] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -68,6 +82,18 @@ function WorkflowsPageInner() {
   const [creating, setCreating] = useState(false);
 
   const active = workflows.find((w) => w.id === activeWorkflowId) ?? null;
+
+  // Load the selected workflow's graph onto the canvas. Runs whenever the
+  // active workflow changes (switching workflows, or the initial load).
+  useEffect(() => {
+    if (!active) return;
+    const loaded = ensurePositions(active.graph);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing local editor state to the newly-selected workflow, not derived render state
+    setGraph(loaded);
+    setSelectedId(loaded.nodes[0]?.id ?? null);
+    setDirty(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWorkflowId]);
 
   async function refreshWorkflows(preferId?: string) {
     const data = await api.get<{ workflows: ApiWorkflow[] }>("/workflows");
@@ -114,7 +140,7 @@ function WorkflowsPageInner() {
     try {
       const workflow = await api.post<ApiWorkflow>("/workflows", {
         name: createName.trim(),
-        graph: DEFAULT_BACKEND_GRAPH,
+        graph: DEFAULT_GRAPH,
       });
       await refreshWorkflows(workflow.id);
       setCreateOpen(false);
@@ -138,10 +164,11 @@ function WorkflowsPageInner() {
     try {
       const updated = await api.patch<ApiWorkflow>(`/workflows/${active.id}`, {
         name: active.name,
-        graph: DEFAULT_BACKEND_GRAPH,
+        graph,
         status: active.status === "DRAFT" ? "ACTIVE" : active.status,
       });
       setWorkflows((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
+      setDirty(false);
       setBanner({ type: "success", text: "Workflow saved." });
     } catch (err) {
       setBanner({ type: "error", text: err instanceof ApiError ? err.message : "Couldn't save the workflow." });
@@ -175,6 +202,72 @@ function WorkflowsPageInner() {
       setTesting(false);
     }
   }
+
+  function handleAddNode(kind: PaletteKind) {
+    const offset = graph.nodes.length * 24;
+    const node = makeNode(kind, { x: 60 + (offset % 400), y: 60 + (offset % 300) });
+    setGraph((g) => ({ ...g, nodes: [...g.nodes, node] }));
+    setSelectedId(node.id);
+    setDirty(true);
+  }
+
+  function handleMoveNode(id: string, position: Position) {
+    setGraph((g) => ({
+      ...g,
+      nodes: g.nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, position } } : n)),
+    }));
+    setDirty(true);
+  }
+
+  function handleConnect(source: string, target: string) {
+    setGraph((g) => {
+      const exists = g.edges.some((e) => e.source === source && e.target === target);
+      if (exists) return g;
+      return { ...g, edges: [...g.edges, { source, target }] };
+    });
+    setDirty(true);
+  }
+
+  function handleDeleteEdge(index: number) {
+    setGraph((g) => ({ ...g, edges: g.edges.filter((_, i) => i !== index) }));
+    setDirty(true);
+  }
+
+  function handleUpdateNode(patch: Partial<EditorNodeData>) {
+    if (!selectedId) return;
+    setGraph((g) => ({
+      ...g,
+      nodes: g.nodes.map((n) => (n.id === selectedId ? { ...n, data: { ...n.data, ...patch } } : n)),
+    }));
+    setDirty(true);
+  }
+
+  function handleDeleteNode() {
+    if (!selectedId) return;
+    const id = selectedId;
+    setGraph((g) => ({
+      nodes: g.nodes.filter((n) => n.id !== id),
+      edges: g.edges.filter((e) => e.source !== id && e.target !== id),
+    }));
+    setSelectedId(null);
+    setDirty(true);
+  }
+
+  function handleDuplicateNode() {
+    if (!selectedId) return;
+    const original = graph.nodes.find((n) => n.id === selectedId);
+    if (!original) return;
+    const copy = {
+      ...original,
+      id: `${original.type}-${Date.now().toString(36)}`,
+      data: { ...original.data, position: { x: original.data.position.x + 32, y: original.data.position.y + 32 }, title: `${original.data.title ?? ""} (copy)` },
+    };
+    setGraph((g) => ({ ...g, nodes: [...g.nodes, copy] }));
+    setSelectedId(copy.id);
+    setDirty(true);
+  }
+
+  const selectedNode = graph.nodes.find((n) => n.id === selectedId) ?? null;
 
   const lastRun = runs[0];
   const executionsToday = runs.filter((r) => isToday(r.createdAt)).length;
@@ -226,6 +319,9 @@ function WorkflowsPageInner() {
                 ? `Last run ${lastRun ? timeAgo(lastRun.createdAt) : "never"} · ${executionsToday} executions today`
                 : "No workflow selected"}
             </span>
+            {dirty && !loading && (
+              <span className="rounded-full bg-warning-muted px-2 py-0.5 text-[11px] font-medium text-warning">Unsaved changes</span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleTestRun} loading={testing} disabled={!active}>
@@ -240,15 +336,29 @@ function WorkflowsPageInner() {
         <Card className="overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px]">
             <div className="border-b border-border p-3.5 lg:border-b-0 lg:border-r">
-              <NodePalette />
+              <NodePalette onAdd={handleAddNode} />
             </div>
 
             <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
-              <WorkflowCanvas selectedId={selectedId} onSelect={setSelectedId} />
+              <WorkflowCanvas
+                graph={graph}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onMoveNode={handleMoveNode}
+                onConnect={handleConnect}
+                onDeleteEdge={handleDeleteEdge}
+              />
             </div>
 
             <div className="h-[560px]">
-              <NodeInspector selectedId={selectedId} />
+              <NodeInspector
+                node={selectedNode}
+                onChange={handleUpdateNode}
+                onDelete={handleDeleteNode}
+                onDuplicate={handleDuplicateNode}
+                onSave={handleSave}
+                saving={saving}
+              />
             </div>
           </div>
         </Card>
