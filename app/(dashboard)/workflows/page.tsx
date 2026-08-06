@@ -334,12 +334,12 @@ function WorkflowsPageInner() {
         </div>
 
         <Card className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_280px]">
-            <div className="border-b border-border p-3.5 lg:border-b-0 lg:border-r">
+          <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px]">
+            <div className="min-w-0 border-b border-border p-3.5 lg:border-b-0 lg:border-r">
               <NodePalette onAdd={handleAddNode} />
             </div>
 
-            <div className="border-b border-border p-4 lg:border-b-0 lg:border-r">
+            <div className="min-w-0 overflow-hidden border-b border-border p-4 lg:border-b-0 lg:border-r">
               <WorkflowCanvas
                 graph={graph}
                 selectedId={selectedId}
@@ -350,7 +350,7 @@ function WorkflowsPageInner() {
               />
             </div>
 
-            <div className="h-[560px]">
+            <div className="min-w-0 h-[560px]">
               <NodeInspector
                 node={selectedNode}
                 onChange={handleUpdateNode}

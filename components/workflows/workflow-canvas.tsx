@@ -184,7 +184,7 @@ export function WorkflowCanvas({
   const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
 
   return (
-    <div ref={wrapperRef} className="relative">
+    <div ref={wrapperRef} className="relative w-full min-w-0">
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-control border border-border bg-card/95 p-1 shadow-elevated backdrop-blur">
         <button
           onClick={() => adjustZoom(Math.max(MIN_ZOOM, Number((zoom - 0.1).toFixed(2))))}
