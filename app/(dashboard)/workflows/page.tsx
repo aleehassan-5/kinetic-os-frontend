@@ -81,6 +81,9 @@ function WorkflowsPageInner() {
   const [createName, setCreateName] = useState("");
   const [creating, setCreating] = useState(false);
 
+  const [deletingWorkflow, setDeletingWorkflow] = useState<WorkflowSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const active = workflows.find((w) => w.id === activeWorkflowId) ?? null;
 
   // Load the selected workflow's graph onto the canvas. Runs whenever the
@@ -174,6 +177,24 @@ function WorkflowsPageInner() {
       setBanner({ type: "error", text: err instanceof ApiError ? err.message : "Couldn't save the workflow." });
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDeleteWorkflow() {
+    if (!deletingWorkflow) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/workflows/${deletingWorkflow.id}`);
+      const wasActive = deletingWorkflow.id === activeWorkflowId;
+      const remaining = workflows.filter((w) => w.id !== deletingWorkflow.id);
+      setDeletingWorkflow(null);
+      await refreshWorkflows();
+      if (wasActive) setActiveWorkflowId(remaining[0]?.id ?? null);
+      setBanner({ type: "success", text: "Workflow deleted." });
+    } catch (err) {
+      setBanner({ type: "error", text: err instanceof ApiError ? err.message : "Couldn't delete the workflow." });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -306,6 +327,7 @@ function WorkflowsPageInner() {
                 setCreateName("");
                 setCreateOpen(true);
               }}
+              onRequestDelete={(w) => setDeletingWorkflow(w)}
             />
             {active && (
               <Badge variant={active.status === "ACTIVE" ? "success" : active.status === "PAUSED" ? "warning" : "default"} dot>
@@ -404,6 +426,21 @@ function WorkflowsPageInner() {
             Create workflow
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        open={!!deletingWorkflow}
+        onClose={() => !deleting && setDeletingWorkflow(null)}
+        title="Delete this workflow"
+        description={
+          deletingWorkflow
+            ? `"${deletingWorkflow.name}" and its run history will be permanently removed. This can't be undone.`
+            : undefined
+        }
+      >
+        <Button variant="danger" className="w-full" onClick={handleDeleteWorkflow} loading={deleting}>
+          Yes, delete permanently
+        </Button>
       </Modal>
     </>
   );
