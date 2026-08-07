@@ -109,7 +109,7 @@ function WorkflowsPageInner() {
   useEffect(() => {
     (async () => {
       try {
-        const list = await refreshWorkflows();
+        const list = await refreshWorkflows(searchParams.get("open") ?? undefined);
         if (list.length === 0 || searchParams.get("new") === "1") {
           setCreateOpen(true);
           setCreateName(list.length === 0 ? "Lead qualification & booking" : "");
@@ -283,10 +283,10 @@ function WorkflowsPageInner() {
         }}
       />
 
-      <main className="p-6 lg:p-8">
+      <main className="flex flex-col p-6 lg:h-[calc(100vh-4rem)] lg:overflow-hidden lg:p-8">
         {banner && (
           <div
-            className={`mb-4 rounded-control border px-4 py-2.5 text-[13px] ${
+            className={`mb-4 shrink-0 rounded-control border px-4 py-2.5 text-[13px] ${
               banner.type === "success"
                 ? "border-success/30 bg-success-muted text-success"
                 : "border-danger/30 bg-danger-muted text-danger"
@@ -296,7 +296,7 @@ function WorkflowsPageInner() {
           </div>
         )}
 
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <WorkflowSwitcher
               workflows={workflows.map((w): WorkflowSummary => ({ id: w.id, name: w.name, status: w.status }))}
@@ -333,13 +333,13 @@ function WorkflowsPageInner() {
           </div>
         </div>
 
-        <Card className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px]">
-            <div className="min-w-0 border-b border-border p-3.5 lg:border-b-0 lg:border-r">
+        <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)_280px]">
+            <div className="min-w-0 overflow-y-auto border-b border-border p-3.5 lg:border-b-0 lg:border-r">
               <NodePalette onAdd={handleAddNode} />
             </div>
 
-            <div className="min-w-0 overflow-hidden border-b border-border p-4 lg:border-b-0 lg:border-r">
+            <div className="flex min-h-[420px] min-w-0 flex-col overflow-hidden border-b border-border p-4 lg:min-h-0 lg:border-b-0 lg:border-r">
               <WorkflowCanvas
                 graph={graph}
                 selectedId={selectedId}
@@ -350,7 +350,7 @@ function WorkflowsPageInner() {
               />
             </div>
 
-            <div className="min-w-0 h-[560px]">
+            <div className="min-h-0 min-w-0 h-[560px] lg:h-auto lg:overflow-y-auto">
               <NodeInspector
                 node={selectedNode}
                 onChange={handleUpdateNode}
@@ -364,7 +364,7 @@ function WorkflowsPageInner() {
         </Card>
 
         {testLogs && (
-          <Card className="mt-4 p-4">
+          <Card className="mt-4 shrink-0 p-4">
             <p className="mb-3 text-[13px] font-semibold text-text-primary">Test run log</p>
             <div className="space-y-2">
               {testLogs.map((log, i) => (

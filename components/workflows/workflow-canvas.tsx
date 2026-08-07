@@ -184,7 +184,7 @@ export function WorkflowCanvas({
   const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
 
   return (
-    <div ref={wrapperRef} className="relative w-full min-w-0">
+    <div ref={wrapperRef} className="relative flex h-full min-w-0 flex-col">
       <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-control border border-border bg-card/95 p-1 shadow-elevated backdrop-blur">
         <button
           onClick={() => adjustZoom(Math.max(MIN_ZOOM, Number((zoom - 0.1).toFixed(2))))}
@@ -221,8 +221,7 @@ export function WorkflowCanvas({
       </div>
 
       <div
-        className="overflow-auto rounded-card bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]"
-        style={{ minHeight: 560 }}
+        className="min-h-0 flex-1 overflow-auto rounded-card bg-[radial-gradient(circle,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[length:20px_20px]"
       >
         <div style={{ width: width * zoom, height: height * zoom }}>
           <div ref={contentRef} style={{ width, height, transform: `scale(${zoom})`, transformOrigin: "top left" }}>

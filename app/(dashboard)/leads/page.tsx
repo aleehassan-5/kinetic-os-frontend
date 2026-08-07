@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Inbox as InboxIcon, Loader2 } from "lucide-react";
 import { Topnav } from "@/components/layout/topnav";
 import { Card } from "@/components/ui/card";
@@ -22,6 +23,15 @@ const apiChannelFor: Record<Channel, string> = {
 };
 
 export default function LeadsPage() {
+  return (
+    <Suspense fallback={null}>
+      <LeadsPageInner />
+    </Suspense>
+  );
+}
+
+function LeadsPageInner() {
+  const searchParams = useSearchParams();
   const [apiLeads, setApiLeads] = useState<ApiLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -39,10 +49,12 @@ export default function LeadsPage() {
       .get<{ leads: ApiLead[] }>(`/leads${qs ? `?${qs}` : ""}`)
       .then((data) => {
         setApiLeads(data.leads);
-        setActiveId((prev) => prev ?? data.leads[0]?.id ?? null);
+        const wantedId = searchParams.get("id");
+        setActiveId((prev) => prev ?? (wantedId && data.leads.some((l) => l.id === wantedId) ? wantedId : data.leads[0]?.id ?? null));
       })
       .catch(() => setApiLeads([]))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, advanced]);
 
   const leads = useMemo(() => apiLeads.map(mapApiLead), [apiLeads]);
