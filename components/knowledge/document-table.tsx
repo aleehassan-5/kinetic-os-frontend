@@ -1,10 +1,46 @@
 import { useEffect, useRef, useState } from "react";
-import { FileText, FileSpreadsheet, Globe, HelpCircle, File, RotateCw, Trash2, MoreHorizontal, Loader2, ExternalLink, Copy, Check } from "lucide-react";
+import { FileText, FileSpreadsheet, Globe, HelpCircle, File, RotateCw, Trash2, MoreHorizontal, Loader2, ExternalLink, Copy, Check, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { KnowledgeDoc, typeStyle, statusVariant } from "./data";
 
 const typeIcon = { PDF: FileText, DOCX: File, URL: Globe, FAQ: HelpCircle, Sheet: FileSpreadsheet };
+
+/** Visible on-hover/tap bubble with the actual ingestion failure reason — a native `title` attribute alone is too easy to miss. */
+function FailureReasonTip({ message }: { message: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="group/tip relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-4 w-4 items-center justify-center text-danger/80 transition-colors duration-150 hover:text-danger"
+      >
+        <AlertCircle className="h-3.5 w-3.5" />
+      </button>
+      <div
+        className={cn(
+          "absolute left-1/2 top-[calc(100%+6px)] z-20 w-64 -translate-x-1/2 rounded-control border border-border bg-card p-2.5 text-left text-[12px] leading-relaxed text-text-secondary shadow-lg transition-opacity duration-150",
+          open ? "opacity-100" : "pointer-events-none opacity-0 group-hover/tip:opacity-100"
+        )}
+      >
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-danger">Why it failed</p>
+        {message}
+      </div>
+    </div>
+  );
+}
 
 function RowActionsMenu({ doc }: { doc: KnowledgeDoc }) {
   const [open, setOpen] = useState(false);
@@ -123,14 +159,15 @@ export function DocumentTable({
                   </div>
                 </td>
                 <td className="px-3 py-3.5">
-                  <Badge
-                    variant={statusVariant[doc.status]}
-                    dot={doc.status !== "Processing"}
-                    title={doc.status === "Failed" && doc.error ? doc.error : undefined}
-                  >
-                    {doc.status === "Processing" && <Loader2 className="h-3 w-3 animate-spin" />}
-                    {doc.status}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant={statusVariant[doc.status]} dot={doc.status !== "Processing"}>
+                      {doc.status === "Processing" && <Loader2 className="h-3 w-3 animate-spin" />}
+                      {doc.status}
+                    </Badge>
+                    {doc.status === "Failed" && (
+                      <FailureReasonTip message={doc.error || "No error details were recorded for this failure — try re-syncing."} />
+                    )}
+                  </div>
                 </td>
                 <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{doc.chunks || "—"}</td>
                 <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{doc.size}</td>
