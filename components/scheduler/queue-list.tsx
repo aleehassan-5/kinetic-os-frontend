@@ -104,7 +104,19 @@ export function QueueList({
                 </div>
               )}
             </div>
-            <Badge variant={statusVariant[p.status]}>{p.status}</Badge>
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <Badge variant={statusVariant[p.status]}>{p.status}</Badge>
+              {p.status !== "Failed" && p.status !== "Published" && (
+                <button
+                  onClick={() => remove(p.id)}
+                  disabled={busy}
+                  title="Delete"
+                  className="rounded-control p-1 text-text-muted transition-colors duration-200 hover:bg-danger-muted hover:text-danger disabled:opacity-50"
+                >
+                  {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                </button>
+              )}
+            </div>
           </div>
         );
       })}
