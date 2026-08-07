@@ -26,8 +26,12 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { isSuperAdmin } = await login(email, password);
+      const { isSuperAdmin, pending } = await login(email, password);
       setSuccess(true);
+      if (pending) {
+        setTimeout(() => router.push("/signup/pending"), 700);
+        return;
+      }
       setTimeout(() => router.push(isSuperAdmin ? "/admin" : "/dashboard"), 700);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Invalid email or password. Please try again.");

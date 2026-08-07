@@ -49,7 +49,7 @@ interface AuthContextValue {
   role: Role | null;
   isSuperAdmin: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ isSuperAdmin: boolean }>;
+  login: (email: string, password: string) => Promise<{ isSuperAdmin: boolean; pending: boolean }>;
   loginWithTokens: (accessToken: string, refreshToken: string) => Promise<{ isSuperAdmin: boolean }>;
   register: (input: RegisterInput) => Promise<{ message: string }>;
   logout: () => Promise<void>;
@@ -99,14 +99,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const data = await api.post<{ user: WorkspaceUser } & AuthTokens>(
+      const data = await api.post<{ user: WorkspaceUser; pending?: false } & AuthTokens | { pending: true }>(
         "/auth/login",
         { email, password },
         { skipAuth: true }
       );
+      if ("pending" in data && data.pending) {
+        return { isSuperAdmin: false, pending: true as const };
+      }
       setTokens(data.accessToken, data.refreshToken);
       const me = await loadMe();
-      return { isSuperAdmin: me?.isSuperAdmin ?? false };
+      return { isSuperAdmin: me?.isSuperAdmin ?? false, pending: false as const };
     },
     [loadMe]
   );
