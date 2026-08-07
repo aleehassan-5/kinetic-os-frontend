@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Ban, RotateCcw, Loader2, Building2 } from "lucide-react";
+import { CheckCircle2, XCircle, Ban, RotateCcw, Loader2, Building2, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +52,7 @@ export default function AdminAccountsPage() {
 
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function refresh() {
     setLoading(true);
@@ -120,6 +121,61 @@ export default function AdminAccountsPage() {
     }
   }
 
+  async function deleteAccount() {
+    if (!deletingId) return;
+    setBusyId(deletingId);
+    setNotice(null);
+    try {
+      await api.delete(`/admin/accounts/${deletingId}`);
+      setDeletingId(null);
+      refresh();
+    } catch (err) {
+      setNotice(err instanceof ApiError ? err.message : "Couldn't delete this account.");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function accountActions(acc: ApiAccount, busy: boolean) {
+    return (
+      <>
+        {acc.status === "PENDING" && (
+          <>
+            <Button size="sm" onClick={() => approve(acc.id)} loading={busy}>
+              <CheckCircle2 className="h-3.5 w-3.5" /> Approve
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setRejectingId(acc.id);
+                setRejectReason("");
+              }}
+              disabled={busy}
+            >
+              <XCircle className="h-3.5 w-3.5" /> Reject
+            </Button>
+          </>
+        )}
+        {acc.status === "ACTIVE" && (
+          <Button size="sm" variant="ghost" onClick={() => suspend(acc.id)} loading={busy}>
+            <Ban className="h-3.5 w-3.5" /> Suspend
+          </Button>
+        )}
+        {acc.status === "SUSPENDED" && (
+          <Button size="sm" variant="secondary" onClick={() => reactivate(acc.id)} loading={busy}>
+            <RotateCcw className="h-3.5 w-3.5" /> Reactivate
+          </Button>
+        )}
+        {acc.status === "REJECTED" && (
+          <Button size="sm" variant="ghost" onClick={() => setDeletingId(acc.id)} disabled={busy}>
+            <Trash2 className="h-3.5 w-3.5 text-danger" /> Delete
+          </Button>
+        )}
+      </>
+    );
+  }
+
   return (
     <div className="space-y-5">
       <div>
@@ -133,13 +189,13 @@ export default function AdminAccountsPage() {
         </div>
       )}
 
-      <div className="flex items-center gap-1.5 border-b border-border pb-px">
+      <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border pb-px">
         {tabs.map((t) => (
           <button
             key={t.value}
             onClick={() => setTab(t.value)}
             className={cn(
-              "rounded-t-control px-3 py-2 text-[13px] font-medium transition-colors duration-200",
+              "shrink-0 rounded-t-control px-3 py-2 text-[13px] font-medium transition-colors duration-200",
               tab === t.value
                 ? "border-b-2 border-primary text-text-primary"
                 : "text-text-secondary hover:text-text-primary"
@@ -160,75 +216,87 @@ export default function AdminAccountsPage() {
           <p className="text-[13px] text-text-secondary">No accounts here.</p>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-text-muted">
-                <th className="px-5 py-3">Business</th>
-                <th className="px-3 py-3">Owner</th>
-                <th className="px-3 py-3">Niche</th>
-                <th className="px-3 py-3">Applied</th>
-                <th className="px-3 py-3">Status</th>
-                <th className="px-3 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((acc) => {
-                const busy = busyId === acc.id;
-                return (
-                  <tr key={acc.id} className="border-b border-border transition-colors duration-200 last:border-b-0 hover:bg-white/[0.02]">
-                    <td className="px-5 py-3.5">
-                      <Link href={`/admin/accounts/${acc.id}`} className="text-[13px] font-medium text-text-primary hover:text-primary">
-                        {acc.businessName}
-                      </Link>
-                    </td>
-                    <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{acc.ownerEmail}</td>
-                    <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{acc.niche ?? "—"}</td>
-                    <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">
-                      {new Date(acc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <Badge variant={statusVariant[acc.status]}>{acc.status}</Badge>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <div className="flex justify-end gap-1.5">
-                        {acc.status === "PENDING" && (
-                          <>
-                            <Button size="sm" onClick={() => approve(acc.id)} loading={busy}>
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setRejectingId(acc.id);
-                                setRejectReason("");
-                              }}
-                              disabled={busy}
-                            >
-                              <XCircle className="h-3.5 w-3.5" /> Reject
-                            </Button>
-                          </>
-                        )}
-                        {acc.status === "ACTIVE" && (
-                          <Button size="sm" variant="ghost" onClick={() => suspend(acc.id)} loading={busy}>
-                            <Ban className="h-3.5 w-3.5" /> Suspend
-                          </Button>
-                        )}
-                        {acc.status === "SUSPENDED" && (
-                          <Button size="sm" variant="secondary" onClick={() => reactivate(acc.id)} loading={busy}>
-                            <RotateCcw className="h-3.5 w-3.5" /> Reactivate
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </Card>
+        <>
+          {/* Desktop / tablet: table */}
+          <Card className="hidden overflow-x-auto md:block">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-border text-[11px] font-semibold uppercase tracking-wider text-text-muted">
+                  <th className="px-5 py-3">Business</th>
+                  <th className="px-3 py-3">Owner</th>
+                  <th className="px-3 py-3">Niche</th>
+                  <th className="px-3 py-3">Applied</th>
+                  <th className="px-3 py-3">Status</th>
+                  <th className="px-3 py-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {accounts.map((acc) => {
+                  const busy = busyId === acc.id;
+                  return (
+                    <tr key={acc.id} className="border-b border-border transition-colors duration-200 last:border-b-0 hover:bg-white/[0.02]">
+                      <td className="px-5 py-3.5">
+                        <Link href={`/admin/accounts/${acc.id}`} className="text-[13px] font-medium text-text-primary hover:text-primary">
+                          {acc.businessName}
+                        </Link>
+                      </td>
+                      <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{acc.ownerEmail}</td>
+                      <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">{acc.niche ?? "—"}</td>
+                      <td className="px-3 py-3.5 text-[12.5px] text-text-secondary">
+                        {new Date(acc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </td>
+                      <td className="px-3 py-3.5">
+                        <Badge variant={statusVariant[acc.status]}>{acc.status}</Badge>
+                      </td>
+                      <td className="px-3 py-3.5">
+                        <div className="flex flex-wrap justify-end gap-1.5">{accountActions(acc, busy)}</div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </Card>
+
+          {/* Mobile: stacked cards */}
+          <div className="space-y-3 md:hidden">
+            {accounts.map((acc) => {
+              const busy = busyId === acc.id;
+              return (
+                <Card key={acc.id} className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link href={`/admin/accounts/${acc.id}`} className="min-w-0 text-[14px] font-medium text-text-primary hover:text-primary">
+                      <span className="block truncate">{acc.businessName}</span>
+                    </Link>
+                    <Badge variant={statusVariant[acc.status]}>{acc.status}</Badge>
+                  </div>
+                  <p className="mt-1 truncate text-[12.5px] text-text-secondary">{acc.ownerEmail}</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-text-muted">
+                    <span>{acc.niche ?? "No niche"}</span>
+                    <span>
+                      Applied {new Date(acc.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">{accountActions(acc, busy)}</div>
+                </Card>
+              );
+            })}
+          </div>
+        </>
       )}
+
+      <Modal
+        open={!!deletingId}
+        onClose={() => !busyId && setDeletingId(null)}
+        title="Delete this account"
+        description="This permanently removes the rejected application and its user record — the email becomes free for a brand new signup. This can't be undone."
+      >
+        <div className="space-y-3">
+          <Button variant="danger" className="w-full" onClick={deleteAccount} loading={!!busyId}>
+            Yes, delete permanently
+          </Button>
+        </div>
+      </Modal>
 
       <Modal
         open={!!rejectingId}

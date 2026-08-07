@@ -27,14 +27,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between border-b border-border px-6 py-3.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5 sm:px-6">
         <div className="flex items-center gap-2.5">
           <Logo size="sm" />
           <span className="font-display text-[15px] font-semibold tracking-tight text-text-primary">
-            Kinetic OS <span className="font-sans text-[12.5px] font-normal text-text-muted">— Platform Admin</span>
+            Kinetic OS <span className="hidden font-sans text-[12.5px] font-normal text-text-muted sm:inline">— Platform Admin</span>
           </span>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4 sm:gap-5">
           <Link href="/admin/account" className="text-[13px] font-medium text-text-secondary hover:text-text-primary">
             Account
           </Link>
@@ -43,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
       </header>
-      <main className="p-6 lg:p-8">{children}</main>
+      <main className="p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );
 }

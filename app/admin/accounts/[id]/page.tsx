@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle, Ban, RotateCcw, Loader2, Mail, Phone, Briefcase, Users, Building2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Ban, RotateCcw, Loader2, Mail, Phone, Briefcase, Users, Building2, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,7 @@ export default function AdminAccountDetailPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   function refresh() {
     setLoading(true);
@@ -109,6 +110,18 @@ export default function AdminAccountDetailPage() {
     }
   }
 
+  async function deleteAccount() {
+    setBusy(true);
+    setNotice(null);
+    try {
+      await api.delete(`/admin/accounts/${id}`);
+      router.push("/admin");
+    } catch (err) {
+      setNotice(err instanceof ApiError ? err.message : "Couldn't delete this account.");
+      setBusy(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-[13px] text-text-secondary">
@@ -137,14 +150,14 @@ export default function AdminAccountDetailPage() {
       )}
 
       <Card className="overflow-hidden">
-        <CardHeader>
+        <CardHeader className="flex-col items-start gap-3 sm:flex-row sm:items-center">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <CardTitle>{account.businessName}</CardTitle>
               <Badge variant={statusVariant[account.status]}>{account.status}</Badge>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {account.status === "PENDING" && (
               <>
                 <Button size="sm" onClick={approve} loading={busy}>
@@ -163,6 +176,11 @@ export default function AdminAccountDetailPage() {
             {account.status === "SUSPENDED" && (
               <Button size="sm" variant="secondary" onClick={reactivate} loading={busy}>
                 <RotateCcw className="h-3.5 w-3.5" /> Reactivate
+              </Button>
+            )}
+            {account.status === "REJECTED" && (
+              <Button size="sm" variant="ghost" onClick={() => setDeleteOpen(true)} disabled={busy}>
+                <Trash2 className="h-3.5 w-3.5 text-danger" /> Delete
               </Button>
             )}
           </div>
@@ -239,6 +257,18 @@ export default function AdminAccountDetailPage() {
           </div>
           <Button variant="danger" className="w-full" onClick={submitReject} loading={busy}>
             Confirm rejection
+          </Button>
+        </div>
+      </Modal>
+      <Modal
+        open={deleteOpen}
+        onClose={() => !busy && setDeleteOpen(false)}
+        title="Delete this account"
+        description="This permanently removes the rejected application and its user record — the email becomes free for a brand new signup. This can't be undone."
+      >
+        <div className="space-y-3">
+          <Button variant="danger" className="w-full" onClick={deleteAccount} loading={busy}>
+            Yes, delete permanently
           </Button>
         </div>
       </Modal>
